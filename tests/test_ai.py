@@ -1,5 +1,6 @@
 """AI integrations are tested with fake providers: no network, no keys."""
 import json
+import sys
 from types import SimpleNamespace as NS
 
 import pytest
@@ -126,6 +127,9 @@ def test_draft_summary_needs_opt_in_and_is_audited(orch):
 def test_build_llm_off_by_default_and_reports_reason(monkeypatch):
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     assert build_llm(LLMConfig(provider="off")) is None
+    cfg = LLMConfig(provider="anthropic")
+    assert build_llm(cfg) is None and ("not installed" in cfg.reason or "ANTHROPIC_API_KEY" in cfg.reason)  # CI has no anthropic package
+    monkeypatch.setitem(sys.modules, "anthropic", NS())  # package present, key missing
     cfg = LLMConfig(provider="anthropic")
     assert build_llm(cfg) is None and "ANTHROPIC_API_KEY" in cfg.reason
     cfg = LLMConfig(provider="openai_compat")
