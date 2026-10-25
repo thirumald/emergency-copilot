@@ -33,7 +33,7 @@ _LABELS = {
     "incident_type": "Incident type", "location": "Location", "address_detail": "Building / floor", "priority": "Priority",
     "persons": "People involved", "ages": "Age(s)", "injuries": "Injuries", "weapons": "Weapons", "vehicles": "Vehicles",
     "plates": "Plate numbers", "hazards": "Hazards", "narrative": "Narrative", "caller_number": "Caller number",
-    "language": "Caller language", "region": "Region",
+    "language": "Caller language", "region": "Region", "narrative_ai": "Narrative (AI draft)",
 }
 
 

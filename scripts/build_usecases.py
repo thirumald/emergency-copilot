@@ -78,12 +78,14 @@ def main() -> None:
         "audio": audio_samples(orch), "facilities": orch.ref.facilities, "regions": orch.ref.regions,
     }
     data["agencies"] = orch.ref.agencies
+    data["help"] = json.loads((ROOT / "copilot" / "data" / "help.json").read_text(encoding="utf-8"))["entries"]
+    widget = (ROOT / "web" / "help_widget.html").read_text(encoding="utf-8")
     blob = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
     for name in ("usecases", "ccc"):
         tpl_path = ROOT / "web" / f"{name}.template.html"
         if not tpl_path.exists():
             continue
-        html = tpl_path.read_text(encoding="utf-8").replace("/*__DATA__*/null", blob)
+        html = tpl_path.read_text(encoding="utf-8").replace("/*__DATA__*/null", blob).replace("<!--__HELP__-->", widget)
         (ROOT / "web" / f"{name}.html").write_text(html, encoding="utf-8")
         print(f"web/{name}.html written ({len(html) // 1024} KB, {len(data['scenarios'])} scenarios)")
 

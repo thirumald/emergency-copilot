@@ -26,7 +26,12 @@ function showTab(name) {
 }
 
 // -------------------------------------------------------------- call control
+async function initAI() {
+  try { const st = await api("/api/agent/status"); if (st.call_data_shared) { $("#aiDraft").hidden = false;
+    $("#aiDraft").onclick = async () => { if (!callId) return; try { await post(`/api/calls/${callId}/ai-summary`); } catch (e) { alert(e.message); } }; } } catch {}
+}
 async function init() {
+  initAI();
   const sc = await api("/api/scenarios");
   $("#scenario").innerHTML = sc.map((s) => `<option value="${esc(s.id)}">${esc(s.title)}</option>`).join("");
   gaz = await api("/api/gazetteer");
@@ -227,4 +232,25 @@ async function refreshAudit() {
 }
 $("#refreshMetrics").onclick = refreshMetrics; $("#refreshShadow").onclick = refreshShadow; $("#refreshAudit").onclick = refreshAudit;
 $("#apiKey").onchange = (e) => { KEY = e.target.value; store.set("copilot_key", KEY); };
+// ------------------------------------------------------------- support agent
+const agent = { hist: [] };
+const SUG = ["What is shadow mode?", "How is priority calculated?", "What do the alerts mean?", "How do I switch a feature off?"];
+function agentAdd(cls, text, note) { const d = document.createElement("div"); d.className = "am " + cls; d.dir = "auto"; d.textContent = text; if (note) { const n = document.createElement("small"); n.textContent = note; d.appendChild(n); } $("#agentLog").appendChild(d); $("#agentLog").scrollTop = 1e6; }
+async function agentOpen() {
+  $("#agentPanel").hidden = false; $("#agentBtn").hidden = true; $("#agentIn").focus();
+  try { const st = await api("/api/agent/status"); const ai = st.mode !== "off";
+    $("#agentMode").textContent = ai ? `AI · ${st.provider}` : "keyword help (no AI configured)"; $("#agentMode").className = "agentmode " + (ai ? "ai" : "");
+    $("#agentNote").textContent = "Read-only: it cannot dispatch or change records." + (st.call_data_shared ? " Call data is shared with the AI provider." : ai ? " Call content is not shared with the AI." : ""); } catch { $("#agentMode").textContent = "offline"; }
+  if (!$("#agentLog").children.length) agentAdd("a", "Hi, I can explain how the Co-Pilot works, protocol questions and system status. I cannot dispatch units, edit records or give medical advice.");
+  $("#agentSug").innerHTML = SUG.map((q) => `<button type="button">${esc(q)}</button>`).join("");
+  document.querySelectorAll("#agentSug button").forEach((b) => (b.onclick = () => agentAsk(b.textContent)));
+}
+async function agentAsk(q) {
+  agentAdd("u", q); agent.hist.push({ role: "user", content: q }); $("#agentIn").value = "";
+  const wait = document.createElement("div"); wait.className = "am a"; wait.textContent = "…"; $("#agentLog").appendChild(wait);
+  try { const r = await post("/api/agent/chat", { messages: agent.hist }); wait.remove(); agentAdd("a", r.reply, r.tools.length ? "looked up: " + r.tools.map((t) => t.name).join(", ") : r.mode === "faq" ? "keyword help" : ""); agent.hist.push({ role: "assistant", content: r.reply }); }
+  catch (e) { wait.remove(); agentAdd("a", "Support is unavailable: " + e.message); }
+}
+$("#agentBtn").onclick = agentOpen; $("#agentClose").onclick = () => { $("#agentPanel").hidden = true; $("#agentBtn").hidden = false; };
+$("#agentForm").onsubmit = (e) => { e.preventDefault(); const q = $("#agentIn").value.trim(); if (q) agentAsk(q); };
 init().catch((e) => console.error(e));

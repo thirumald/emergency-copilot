@@ -68,3 +68,13 @@ class FasterWhisperBackend:
             return text, round(min(1.0, conf), 2)
 
         return await asyncio.to_thread(run)
+
+    async def transcribe_file(self, path: str, language: str | None, hotwords: list[str]) -> tuple[str, float, str]:
+        """Transcribe an audio file (wav, mp3, ...). Returns (text, confidence, detected language)."""
+        def run() -> tuple[str, float, str]:
+            segs, info = self.model.transcribe(path, beam_size=1, vad_filter=True, language=language, hotwords=" ".join(hotwords[:60]) or None)
+            segs = list(segs)
+            conf = sum(2.718281828 ** s.avg_logprob for s in segs) / len(segs) if segs else 0.0
+            return " ".join(s.text.strip() for s in segs).strip(), round(min(1.0, conf), 2), info.language
+
+        return await asyncio.to_thread(run)

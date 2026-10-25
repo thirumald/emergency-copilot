@@ -3,17 +3,21 @@ from __future__ import annotations
 
 import asyncio
 import os
+import tempfile
 from pathlib import Path
 from typing import Any
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from . import shadow
+from .agent import SupportAgent
+from .aisummary import draft_summary
 from .audit import AuditLog
 from .cad import CADAdapter, MockCAD, RestCAD
+from .llm import LLMConfig, LLMError, build_llm
 from .models import Segment
 from .orchestrator import Orchestrator
 from .speech import ASRBackend, ScriptedASR, load_scenarios
@@ -49,13 +53,31 @@ class ModeIn(BaseModel):
     mode: str
 
 
+class ChatIn(BaseModel):
+    messages: list[dict[str, Any]]
+
+
+def _default_asr() -> ASRBackend | None:
+    if os.environ.get("COPILOT_ASR", "off").lower() != "whisper":
+        return None
+    from .speech import FasterWhisperBackend  # optional dependency, loads the model once
+
+    return FasterWhisperBackend(os.environ.get("COPILOT_WHISPER_MODEL", "small"), os.environ.get("COPILOT_WHISPER_DEVICE", "auto"))
+
+
 def create_app(var_dir: Path | None = None, cad: CADAdapter | None = None, mode: str | None = None,
-               asr_backend: ASRBackend | None = None) -> FastAPI:
+               asr_backend: ASRBackend | None = None, llm: Any = None, llm_cfg: LLMConfig | None = None) -> FastAPI:
     var = Path(var_dir or os.environ.get("COPILOT_VAR", ROOT / "var"))
     if cad is None:
         cad = RestCAD(os.environ["CAD_URL"]) if os.environ.get("CAD_URL") else MockCAD(var / "cad")
     orch = Orchestrator(AuditLog(var / "audit.jsonl"), cad, mode=mode or os.environ.get("COPILOT_MODE", "assist"), archive_dir=var / "calls")
     scenarios = load_scenarios()
+    llm_cfg = llm_cfg or LLMConfig.from_env()
+    if llm is None:
+        llm = build_llm(llm_cfg)
+    if asr_backend is None:
+        asr_backend = _default_asr()
+    agent = SupportAgent(orch, llm, llm_cfg)
     api_key = os.environ.get("COPILOT_API_KEY")
 
     def auth(x_api_key: str | None = Header(default=None)) -> None:
@@ -107,6 +129,43 @@ def create_app(var_dir: Path | None = None, cad: CADAdapter | None = None, mode:
     @app.get("/api/calls/{call_id}/case", dependencies=protected)
     def get_case(call_id: str):
         return orch.case(call_or_404(call_id))
+
+    @app.get("/api/agent/status", dependencies=protected)
+    def agent_status():
+        return agent.status()
+
+    @app.post("/api/agent/chat", dependencies=protected)
+    async def agent_chat(body: ChatIn):
+        try:
+            return await asyncio.to_thread(agent.chat, body.messages)  # LLM calls are slow: keep the event loop free for live calls
+        except ValueError as e:
+            raise HTTPException(422, str(e)) from None
+
+    @app.post("/api/calls/{call_id}/ai-summary", dependencies=protected)
+    async def ai_summary(call_id: str):
+        call_or_404(call_id)
+        try:
+            sug = await asyncio.to_thread(draft_summary, orch, llm, llm_cfg, call_id)
+        except LLMError as e:
+            raise HTTPException(409, str(e)) from None
+        except Exception as e:
+            raise HTTPException(502, f"AI service error: {type(e).__name__}") from None
+        return sug
+
+    @app.post("/api/transcribe", dependencies=protected)
+    async def transcribe(request: Request, language: str | None = None):
+        """Raw audio bytes in the body (wav/mp3/ogg); local Whisper only. For checking real recordings against the ASR."""
+        if asr_backend is None or not hasattr(asr_backend, "transcribe_file"):
+            raise HTTPException(501, "no local ASR configured: pip install faster-whisper and set COPILOT_ASR=whisper")
+        data = await request.body()
+        if not data or len(data) > 25_000_000:
+            raise HTTPException(413, "send 1 byte to 25 MB of audio in the request body")
+        with tempfile.NamedTemporaryFile(suffix=".audio") as f:
+            f.write(data)
+            f.flush()
+            text, conf, lang = await asr_backend.transcribe_file(f.name, language, orch.location.gaz.hotwords())
+        orch.audit.write(None, "system", "transcribe_file", {"bytes": len(data), "language": lang})
+        return {"text": text, "confidence": conf, "language": lang}
 
     @app.get("/api/regions", dependencies=protected)
     def regions():

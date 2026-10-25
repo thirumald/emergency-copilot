@@ -1,0 +1,31 @@
+<!-- Help widget: keyword search over the same help answers the in-app agent uses. Not an AI model; nothing is sent anywhere. -->
+<style>
+#hlpBtn{position:fixed;right:16px;bottom:16px;z-index:90;border:0;border-radius:99px;padding:11px 16px;font:700 14px system-ui,sans-serif;background:#2457e6;color:#fff;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+#hlpPanel{position:fixed;right:16px;bottom:16px;z-index:91;width:min(380px,calc(100vw - 32px));max-height:min(540px,calc(100vh - 32px));display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:16px;background:var(--surface,var(--panel,#fff));color:var(--text,#14202e);border:1px solid var(--line,#dbe2ea);box-shadow:0 16px 48px rgba(0,0,0,.4);font:14px/1.45 system-ui,sans-serif}
+#hlpPanel[hidden]{display:none}#hlpPanel header{display:flex;align-items:center;gap:8px}#hlpPanel header b{flex:1}
+#hlpPanel button,#hlpPanel input{font:inherit;color:inherit;background:var(--surface2,var(--panel2,#eef2f7));border:1px solid var(--line,#dbe2ea);border-radius:8px;padding:6px 10px}
+#hlpPanel button{cursor:pointer}#hlpOut{overflow:auto;display:grid;gap:8px}.hlpA{padding:8px 10px;border-radius:10px;border:1px solid var(--line,#dbe2ea)}.hlpA b{display:block}
+#hlpSug{display:flex;flex-wrap:wrap;gap:4px}#hlpSug button{font-size:12px;padding:3px 8px}#hlpPanel small{color:var(--muted,#5a6b7d)}
+</style>
+<button id="hlpBtn" type="button" aria-label="Open help">? Help</button>
+<aside id="hlpPanel" hidden aria-label="Help assistant">
+  <header><b>Help assistant</b><button id="hlpX" type="button" aria-label="Close help">×</button></header>
+  <small>Keyword search over the project's help answers. This is not an AI model; the AI support agent is in the app.</small>
+  <form id="hlpForm" style="display:flex;gap:6px"><input id="hlpQ" style="flex:1" placeholder="Ask, e.g. what is shadow mode?" autocomplete="off"><button>Search</button></form>
+  <div id="hlpSug"></div><div id="hlpOut" aria-live="polite"></div>
+</aside>
+<script>
+(function () {
+  const H = D.help, STOP = new Set("the a an is are how do does i to of and what it in my can for on be or".split(" "));
+  const tok = (s) => new Set((s.toLowerCase().match(/[a-z0-9']+/g) || []).filter((t) => !STOP.has(t) && t.length > 1));
+  const inter = (a, b) => { let n = 0; a.forEach((x) => b.has(x) && n++); return n; };
+  function search(q) { const qt = tok(q); return H.map((e) => { const kw = new Set(); e.keywords.forEach((k) => tok(k).forEach((w) => kw.add(w)));
+    return [3 * inter(qt, kw) + 2 * inter(qt, tok(e.q)) + inter(qt, tok(e.a)), e]; }).filter((x) => x[0] > 0).sort((a, b) => b[0] - a[0]).slice(0, 3).map((x) => x[1]); }
+  const out = document.getElementById("hlpOut"), box = (e) => { const d = document.createElement("div"); d.className = "hlpA"; const b = document.createElement("b"); b.textContent = e.q; d.appendChild(b); d.appendChild(document.createTextNode(e.a)); return d; };
+  function ask(q) { out.textContent = ""; const r = search(q); if (!r.length) { out.textContent = "No matching help topic. Try other words, for example: priority, alerts, shadow mode, languages, simulation."; return; } r.forEach((e) => out.appendChild(box(e))); }
+  const sug = document.getElementById("hlpSug"); ["What is shadow mode?", "Is dispatch real?", "Which languages are supported?", "Where does data go?"].forEach((q) => { const b = document.createElement("button"); b.type = "button"; b.textContent = q; b.onclick = () => { document.getElementById("hlpQ").value = q; ask(q); }; sug.appendChild(b); });
+  const open = (v) => { document.getElementById("hlpPanel").hidden = !v; document.getElementById("hlpBtn").hidden = v; if (v) document.getElementById("hlpQ").focus(); };
+  document.getElementById("hlpBtn").onclick = () => open(true); document.getElementById("hlpX").onclick = () => open(false);
+  document.getElementById("hlpForm").onsubmit = (e) => { e.preventDefault(); const q = document.getElementById("hlpQ").value.trim(); if (q) ask(q); };
+})();
+</script>

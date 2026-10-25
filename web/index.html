@@ -42,7 +42,7 @@
 
     <section class="card col">
       <div class="sevrow"><div id="sevBadge" class="sev">–</div><div id="sevReasons" class="muted"></div></div>
-      <h2>Summary</h2>
+      <h2>Summary <button id="aiDraft" hidden type="button" style="font-size:11px;padding:2px 8px">AI draft</button></h2>
       <p id="summary" class="summary" dir="auto">Waiting for call…</p>
       <h2>Suggested fields <span class="muted">(nothing reaches CAD until you accept)</span></h2>
       <div id="fields"></div>
@@ -82,6 +82,14 @@
   </div>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<button id="agentBtn" class="agentbtn" aria-label="Open support agent">? Support agent</button>
+<aside id="agentPanel" class="agentpanel" hidden aria-label="Support agent">
+  <header><b>Support agent</b> <span id="agentMode" class="agentmode"></span><button id="agentClose" aria-label="Close">×</button></header>
+  <div id="agentLog" class="agentlog" aria-live="polite"></div>
+  <div class="agentsug" id="agentSug"></div>
+  <form id="agentForm"><input id="agentIn" placeholder="Ask about the system, a protocol or a case…" dir="auto" autocomplete="off"><button>Ask</button></form>
+  <small id="agentNote" class="muted"></small>
+</aside>
 <script src="app.js"></script>
 </body>
 </html>

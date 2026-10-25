@@ -351,5 +351,6 @@ let last = performance.now(); let acc = 0;
 setInterval(() => { const n = performance.now(), dt = Math.min(0.5, (n - last) / 1000); last = n; tick(dt); acc += dt; if (acc > 0.25) { acc = 0; render(); } }, 100);
 window.__ccc = { get S() { return S; }, spawn, select, tick: (s) => { for (let i = 0; i < s * 10; i++) tick(0.1); render(); } };
 </script>
+<!--__HELP__-->
 </body>
 </html>

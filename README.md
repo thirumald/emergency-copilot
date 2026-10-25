@@ -84,6 +84,21 @@ extraction pipeline; **dispatch, units and their movement are simulated** (unit 
 Controls: pause, 1x/2x/4x time-lapse, autopilot (simulated call-taker and dispatcher) or manual Dispatch buttons, random incoming calls,
 spawn a call, **Surge x6** (units run out, requests queue), reset, full screen. ETAs are straight-line x1.3 at 60 km/h.
 
+## Optional AI services (all OFF by default)
+
+Nothing is sent to any AI service unless an operator turns it on. Every AI request is recorded in the audit log.
+
+| Service | Enable | What it does |
+|---|---|---|
+| **Support agent** (Claude) | `COPILOT_LLM=anthropic`, `ANTHROPIC_API_KEY`, optional `COPILOT_LLM_MODEL` (default `claude-opus-5-5`) | Chat panel in the app (`/api/agent/chat`). **Read-only** tools: help search, protocol questions, system and audit status. Cannot dispatch, edit or accept anything, gives no medical advice. Uses the server-side refusal fallback. Without a key it falls back to keyword help |
+| Call-aware agent and **AI draft summary** | additionally `COPILOT_LLM_SEND_CALL_DATA=1` | Lets the agent explain a call's priority and cues, and drafts a narrative field (`/api/calls/{id}/ai-summary`). Separate opt-in because it sends call content to the provider. Priority stays rule-based |
+| Any OpenAI-compatible LLM | `COPILOT_LLM=openai_compat`, `COPILOT_LLM_BASE_URL`, `COPILOT_LLM_MODEL`, optional `COPILOT_LLM_API_KEY` | Text-only assistant and draft summary, for example a self-hosted vLLM so data stays on premise. No tool use |
+| **Whisper speech recognition** (local) | `pip install faster-whisper`, `COPILOT_ASR=whisper`, optional `COPILOT_WHISPER_MODEL` / `COPILOT_WHISPER_DEVICE` | Powers `/ws/audio/{call_id}` and `POST /api/transcribe` (raw audio body, `?language=ar`) to check real recordings. Runs on your machine; Arabic, English, Hindi, Tamil and Malayalam are supported by Whisper, but the Co-Pilot's extraction still understands only Arabic and English |
+
+The AI integrations are covered by tests that use fake providers; they have **not** been run against the live Claude API or a real Whisper
+model in this repository's CI (no key or model available there). The static pages (`usecases.html`, `ccc.html`) carry a keyword **Help
+assistant** that is not an AI model and sends nothing anywhere.
+
 ## Configuration
 
 | Env var | Purpose |
