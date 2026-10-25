@@ -69,7 +69,7 @@ case record exposes only the non-AI parts. Unit recommendation and ETA remain Ph
 for demos and bids: 25 use cases (17 built in the MVP, 8 roadmap) with filter and detail dialogs, a replayable simulated call,
 a schematic Abu Dhabi region map, roles, safety model, KPI targets and roadmap. The demo frames come from the real pipeline.
 Regenerate after changing scenarios or data with `python scripts/build_usecases.py` (template: `web/usecases.template.html`).
-Also served by the app at `/usecases.html`.
+Also served by the app at `/usecases.html`, and published on GitHub Pages (`.github/workflows/pages.yml`): https://thirumald.github.io/emergency-copilot/
 
 ## Configuration
 
