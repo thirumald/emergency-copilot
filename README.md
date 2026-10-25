@@ -75,6 +75,15 @@ them yet, and the page shows that using the real extractor output.
 Regenerate after changing scenarios or data with `python scripts/build_usecases.py` (template: `web/usecases.template.html`).
 Also served by the app at `/usecases.html`.
 
+## Full-view CCC simulation
+
+`web/ccc.html` is a self-contained, full-screen Command and Control Centre simulation: incident queue, live map of the emirate
+(Leaflet, dark CARTO tiles), unit list, event log, and for the selected incident the replayed call, AI alerts, extracted fields,
+**real-time SOP** (next question, self-ticking checklist, pre-arrival instructions) and **dispatch**. Calls are replayed from the real
+extraction pipeline; **dispatch, units and their movement are simulated** (unit recommendation is Phase 2 and not built in the product).
+Controls: pause, 1x/2x/4x time-lapse, autopilot (simulated call-taker and dispatcher) or manual Dispatch buttons, random incoming calls,
+spawn a call, **Surge x6** (units run out, requests queue), reset, full screen. ETAs are straight-line x1.3 at 60 km/h.
+
 ## Configuration
 
 | Env var | Purpose |

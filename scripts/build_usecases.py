@@ -39,6 +39,8 @@ def frames_for(orch: Orchestrator, sc: dict) -> list[dict]:
             "fields": {k: {"label": st.fields[k].label, "value": str(st.fields[k].value), "conf": st.fields[k].confidence} for k in KEYS if k in st.fields},
             "priority": {"level": st.severity.level, "score": st.severity.score, "reasons": [f"{r.label} +{r.points}" for r in st.severity.reasons]},
             "next": {"en": q["en"], "ar": q["ar"]} if q else None,
+            "type": st.fields["incident_type"].meta.get("type") if "incident_type" in st.fields else None,
+            "instr": [{"cue": i["cue"], "en": i["en"], "ar": i["ar"]} for i in st.instructions],
             "lang": f"{st.lang}{'/' + st.dialect if st.dialect else ''}{' · code-switched' if st.code_switched else ''}",
             "checklist": [{"q": i.question["en"], "done": i.done} for i in st.checklist],
             "case": {"number": case["case_number"], "region": (case.get("location") or {}).get("region"), "area": (case.get("location") or {}).get("area"),
@@ -75,10 +77,15 @@ def main() -> None:
         "places": [{k: e[k] for k in ("name", "name_ar", "type", "lat", "lon", "region")} for e in orch.location.gaz.entries],
         "audio": audio_samples(orch), "facilities": orch.ref.facilities, "regions": orch.ref.regions,
     }
-    tpl = (ROOT / "web" / "usecases.template.html").read_text(encoding="utf-8")
-    html = tpl.replace("/*__DATA__*/null", json.dumps(data, ensure_ascii=False, separators=(",", ":")))
-    (ROOT / "web" / "usecases.html").write_text(html, encoding="utf-8")
-    print(f"web/usecases.html written ({len(html) // 1024} KB, {len(data['scenarios'])} scenarios)")
+    data["agencies"] = orch.ref.agencies
+    blob = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+    for name in ("usecases", "ccc"):
+        tpl_path = ROOT / "web" / f"{name}.template.html"
+        if not tpl_path.exists():
+            continue
+        html = tpl_path.read_text(encoding="utf-8").replace("/*__DATA__*/null", blob)
+        (ROOT / "web" / f"{name}.html").write_text(html, encoding="utf-8")
+        print(f"web/{name}.html written ({len(html) // 1024} KB, {len(data['scenarios'])} scenarios)")
 
 
 if __name__ == "__main__":
