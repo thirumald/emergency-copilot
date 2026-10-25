@@ -239,8 +239,12 @@ function tick(dtReal) {
 
 /* ---------- map: adapter over Leaflet/OSM (default, free, no key) or the Google Maps JavaScript API (operator supplies a key) ---------- */
 let MAP = null, incMk = {}, unitMk = {}, routeLn = {}, MAP_NAME = "", MAP_NOTE = "";
+// Default Google Maps JavaScript API key for this deployment. A web-page key is visible to every visitor, so it MUST be restricted in the
+// Google Cloud Console to this site's HTTP referrers and to the Maps JavaScript API only. A visitor's own key (Map settings) overrides it.
+const DEFAULT_GMAPS_KEY = "AIzaSyDlXdILIUd5vPkDda7coYSgSS1txWcYLog";
 const MAPCFG = (() => { const q = new URLSearchParams(location.search), get = (k) => { try { return localStorage.getItem(k) || ""; } catch { return ""; } };
-  const key = (q.get("gmapsKey") || get("ccc_gkey")).trim(); return { key, prov: q.get("map") || get("ccc_map") || "osm" }; })();
+  const own = (q.get("gmapsKey") || get("ccc_gkey")).trim(), key = own || DEFAULT_GMAPS_KEY;
+  return { key, own, prov: q.get("map") || get("ccc_map") || (key ? "google" : "osm") }; })();
 const CENTER = [24.46, 54.40], ALL_SW = [22.9, 51.8], ALL_NE = [25.0, 56.0];
 
 class LeafletMap {
@@ -294,7 +298,7 @@ async function mapInit() {
 function renderMapStatus() { const e = $("#mapStatus"); if (e) e.innerHTML = `${esc(MAP_NAME || "no map")}${MAP_NOTE ? ` · <span style="color:var(--warn)">${esc(MAP_NOTE)}</span>` : ""} · <a href="#" id="mapCfgOpen" style="color:var(--brand)">Map settings</a>`;
   const o = $("#mapCfgOpen"); if (o) o.onclick = (ev) => { ev.preventDefault(); openMapCfg(); }; }
 function openMapCfg() {
-  const d = $("#mapDlg"); $("#gKey").value = MAPCFG.key; $("#mapProv").value = MAPCFG.prov; d.showModal();
+  const d = $("#mapDlg"); $("#gKey").value = MAPCFG.own; $("#gKey").placeholder = DEFAULT_GMAPS_KEY ? "(leave empty to use this site's built-in key)" : "AIza…"; $("#mapProv").value = MAPCFG.prov; d.showModal();
   $("#mapSave").onclick = () => { try { localStorage.setItem("ccc_map", $("#mapProv").value); localStorage.setItem("ccc_gkey", $("#gKey").value.trim()); } catch {} const u = new URL(location.href); u.search = ""; location.href = u.toString(); };
   $("#mapClear").onclick = () => { try { localStorage.removeItem("ccc_gkey"); localStorage.setItem("ccc_map", "osm"); } catch {} const u = new URL(location.href); u.search = ""; location.href = u.toString(); };
   $("#mapClose").onclick = () => d.close();
