@@ -349,7 +349,7 @@ function renderDetail() {
   const inc = S.incs.find((i) => i.id === S.sel); if (!inc) { $("#detail").innerHTML = '<div class="empty">Select an incident in the queue or on the map.</div>'; $("#detTitle").textContent = "Selected incident"; return; }
   const f = cur(inc), p = prio(inc), shown = inc.frames.slice(0, inc.idx), ev = f ? f.cues.map((c) => c.evidence) : [];
   $("#detTitle").textContent = `Incident ${inc.num}`;
-  let h = `<div class="det"><div class="hd"><div class="pb ${p || ""}">${p || "…"}</div><div><b>${esc(f && f.fields.incident_type ? f.fields.incident_type.value : "Incoming call")}</b><small>${esc(inc.title)} · ${esc(f ? f.lang : "")}</small></div><span class="st ${stClass(inc)}" style="margin-left:auto">${stLabel[inc.state]}</span></div>`;
+  let h = `<div class="det"><div class="hd"><div class="pb ${p || ""}">${p || "…"}</div><div><b>${esc(f && f.fields.incident_type ? f.fields.incident_type.value : "Incoming call")}</b><small>${esc(inc.title)} · ${esc(f ? f.lang : "")}</small></div><span class="st ${stClass(inc)}" style="margin-left:auto">${stLabel[inc.state]}</span><button id="expBtn" title="Download this incident as JSON" aria-label="Export incident as JSON">Export</button></div>`;
   h += `<div><h3>Live call (simulated replay)</h3><div class="tr" id="trbox">${shown.map((m) => `<div class="m ${m.speaker} ${m.lowq ? "lowq" : ""}" dir="auto"><small>${m.speaker}${m.lowq ? " · low audio quality" : ""}</small>${hl(m.text, m.speaker === "calltaker" ? [] : ev)}</div>`).join("") || '<div class="hint">Ringing…</div>'}</div></div>`;
   if (f) { h += `<div><h3>AI alerts</h3>${f.cues.map((c) => `<span class="cue ${c.level}">${ico("alert")} ${esc(c.label)}</span>`).join("") || '<span class="hint">None yet</span>'}</div>`;
     h += `<div class="fl">${["incident_type", "priority", "location", "region", "persons", "ages", "injuries", "hazards"].filter((k) => f.fields[k]).map((k) => `<div class="f"><span>${esc(f.fields[k].label)} · ${Math.round(f.fields[k].conf * 100)}%</span><b dir="auto">${esc(f.fields[k].value)}</b></div>`).join("")}</div>`;
@@ -367,6 +367,10 @@ function renderDetail() {
   h += `<div class="hint">★ recommended = nearest available (straight-line ×1.3 at ${SPEED_KMH} km/h). Autopilot approves recommendations; with autopilot off a dispatcher must click Dispatch.</div></div>`;
   h += `<div><h3>Incident timeline</h3><div class="log" style="max-height:130px;overflow:auto">${S.log.filter((l) => l.inc === inc.id).map((l) => `<div class="le" style="grid-template-columns:62px 1fr"><span>${clockStr(l.t)}</span><span class="k ${l.kind}" style="font-weight:400;color:var(--text)">${esc(l.text)}</span></div>`).join("")}</div></div></div>`;
   const keep = $("#detail").scrollTop; $("#detail").innerHTML = h; $("#detail").scrollTop = keep; const tb = $("#trbox"); if (tb) tb.scrollTop = 1e6;
+  $("#expBtn").onclick = () => { const f = cur(inc), rec = { case_number: inc.num, scenario: inc.sc, simulated: true, priority: prio(inc), state: inc.state, location: { lat: inc.lat, lon: inc.lon },
+      fields: f ? Object.fromEntries(Object.entries(f.fields).map(([k, v]) => [k, v.value])) : {}, alerts: f ? f.cues.map((c) => c.label) : [], assigned_units: inc.assigned, transcript: inc.frames.slice(0, inc.idx).map((m) => ({ speaker: m.speaker, text: m.text })),
+      timeline: S.log.filter((l) => l.inc === inc.id).reverse().map((l) => ({ clock: clockStr(l.t), kind: l.kind, text: l.text })) };
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(rec, null, 2)], { type: "application/json" })); a.download = inc.num + ".json"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); };
   document.querySelectorAll("#detail [data-d]").forEach((b) => (b.onclick = () => { const u = S.units.find((x) => x.id === b.dataset.d); dispatch(inc, u, b.dataset.a, "dispatcher"); }));
 }
 function renderLog() {

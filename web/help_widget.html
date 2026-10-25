@@ -67,6 +67,5 @@ OLLAMA_ORIGINS="*" ollama serve</pre>The page sends your question only to this a
   $h("hlpEp").value = store.get("hlp_ep") || "http://localhost:11434";
   $h("hlpBtn").onclick = () => open(true); $h("hlpX").onclick = () => open(false);
   $h("hlpForm").onsubmit = (e) => { e.preventDefault(); const q = $h("hlpQ").value.trim(); if (q) ask(q); };
-  detect(false);
 })();
 </script>

@@ -78,6 +78,9 @@ def main() -> None:
         "audio": audio_samples(orch), "facilities": orch.ref.facilities, "regions": orch.ref.regions,
     }
     data["agencies"] = orch.ref.agencies
+    uc = json.loads((ROOT / "copilot" / "data" / "usecases.json").read_text(encoding="utf-8"))
+    data["usecases"], data["ui"], data["cats"] = uc["usecases"], uc["ui"], uc["cats"]
+    art = (ROOT / "web" / "art.js").read_text(encoding="utf-8")
     data["help"] = json.loads((ROOT / "copilot" / "data" / "help.json").read_text(encoding="utf-8"))["entries"]
     widget = (ROOT / "web" / "help_widget.html").read_text(encoding="utf-8")
     blob = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
@@ -85,7 +88,8 @@ def main() -> None:
         tpl_path = ROOT / "web" / f"{name}.template.html"
         if not tpl_path.exists():
             continue
-        html = tpl_path.read_text(encoding="utf-8").replace("/*__DATA__*/null", blob).replace("<!--__HELP__-->", widget)
+        d = data if name == "usecases" else {k: v for k, v in data.items() if k not in ("usecases", "ui", "cats", "audio", "help_unused")}
+        html = tpl_path.read_text(encoding="utf-8").replace("/*__DATA__*/null", json.dumps(d, ensure_ascii=False, separators=(",", ":"))).replace("<!--__HELP__-->", widget).replace("/*__ART__*/", art)
         (ROOT / "web" / f"{name}.html").write_text(html, encoding="utf-8")
         print(f"web/{name}.html written ({len(html) // 1024} KB, {len(data['scenarios'])} scenarios)")
 

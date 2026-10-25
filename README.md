@@ -10,7 +10,7 @@ Runs on a laptop with no GPU. The speech and language models are pluggable; this
 ```bash
 pip install -r requirements.txt
 python -m copilot            # http://127.0.0.1:8080  (HOST / PORT env vars)
-python -m pytest             # 43 tests
+python -m pytest             # 66 tests
 python -m copilot.eval       # replay scenarios, score against MVP KPI targets
 ```
 
@@ -66,7 +66,10 @@ case record exposes only the non-AI parts. Unit recommendation and ETA remain Ph
 ## Use-case showcase page
 
 `web/usecases.html` is a self-contained static page (no server, no CDN, inline icons and illustrations, light/dark, responsive)
-for demos and bids: 25 use cases (17 built in the MVP, 8 roadmap) with filter and detail dialogs, a replayable simulated call,
+for demos and bids: 25 use cases (17 built in the MVP, 8 roadmap), each with its own illustrated scene (`web/art.js`), filters and a detail dialog,
+switchable between **English, Arabic (right-to-left), Hindi, Tamil and Malayalam** (`copilot/data/usecases.json`; the non-English text is
+machine-drafted and needs native-speaker review; the rest of the page stays English), plus sections for integrations (with built vs planned status),
+deployment, security and compliance intent, GPU sizing, commercial options, FAQ, a replayable simulated call,
 a schematic Abu Dhabi region map, roles, safety model, KPI targets and roadmap. The demo frames come from the real pipeline.
 It also has five-language audio samples (English, Arabic, Hindi, Tamil, Malayalam: synthetic voices, clips in `web/audio/`,
 text in `copilot/data/audio_samples.json`, regenerate with `python scripts/build_audio.py`, needs espeak-ng and ffmpeg) and a Google Maps
