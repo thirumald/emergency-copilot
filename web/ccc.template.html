@@ -241,7 +241,7 @@ function tick(dtReal) {
 let MAP = null, incMk = {}, unitMk = {}, routeLn = {}, MAP_NAME = "", MAP_NOTE = "";
 // Default Google Maps JavaScript API key for this deployment. A web-page key is visible to every visitor, so it MUST be restricted in the
 // Google Cloud Console to this site's HTTP referrers and to the Maps JavaScript API only. A visitor's own key (Map settings) overrides it.
-const DEFAULT_GMAPS_KEY = "AIzaSyDlXdILIUd5vPkDda7coYSgSS1txWcYLog";
+const DEFAULT_GMAPS_KEY = /*__GMAPS_KEY__*/"";
 const MAPCFG = (() => { const q = new URLSearchParams(location.search), get = (k) => { try { return localStorage.getItem(k) || ""; } catch { return ""; } };
   const own = (q.get("gmapsKey") || get("ccc_gkey")).trim(), key = own || DEFAULT_GMAPS_KEY;
   return { key, own, prov: q.get("map") || get("ccc_map") || (key ? "google" : "osm") }; })();

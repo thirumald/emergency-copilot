@@ -80,3 +80,15 @@ def test_case_regions_facilities_endpoints(client):
     assert {r["name"] for r in client.get("/api/regions").json()} == {"Abu Dhabi Region", "Al Ain Region", "Al Dhafra Region"}
     assert {f["kind"] for f in client.get("/api/facilities").json()} == {"hospital", "police", "civil_defence"}
     assert client.get("/api/calls").json()[0]["region"] == "Al Ain Region"
+
+
+def test_config_exposes_google_key_with_env_override(tmp_path, monkeypatch):
+    monkeypatch.delenv("COPILOT_GOOGLE_MAPS_KEY", raising=False)
+    with TestClient(create_app(tmp_path)) as c:
+        assert c.get("/api/config").json()["google_maps_key"].startswith("AIza")  # default from data/maps.json
+    monkeypatch.setenv("COPILOT_GOOGLE_MAPS_KEY", "")
+    with TestClient(create_app(tmp_path)) as c:
+        assert c.get("/api/config").json()["google_maps_key"] == ""  # empty disables Google Maps in the app
+    monkeypatch.setenv("COPILOT_GOOGLE_MAPS_KEY", "custom-key")
+    with TestClient(create_app(tmp_path)) as c:
+        assert c.get("/api/config").json()["google_maps_key"] == "custom-key"

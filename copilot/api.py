@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import os
 import tempfile
 from pathlib import Path
@@ -51,6 +52,13 @@ class Toggle(BaseModel):
 
 class ModeIn(BaseModel):
     mode: str
+
+
+def _google_key() -> str:
+    """Env COPILOT_GOOGLE_MAPS_KEY wins (empty string disables Google Maps); otherwise the default in data/maps.json."""
+    if "COPILOT_GOOGLE_MAPS_KEY" in os.environ:
+        return os.environ["COPILOT_GOOGLE_MAPS_KEY"].strip()
+    return json.loads((Path(__file__).parent / "data" / "maps.json").read_text(encoding="utf-8")).get("google_maps_key", "")
 
 
 class ChatIn(BaseModel):
@@ -237,7 +245,7 @@ def create_app(var_dir: Path | None = None, cad: CADAdapter | None = None, mode:
         """Map settings. Point COPILOT_TILE_URL at an on-premise tile server for air-gapped centres."""
         return {"tile_url": os.environ.get("COPILOT_TILE_URL", "https://tile.openstreetmap.org/{z}/{x}/{y}.png"),
                 "attribution": os.environ.get("COPILOT_TILE_ATTRIBUTION", "© OpenStreetMap contributors"),
-                "center": [24.4539, 54.3773], "zoom": 11}
+                "center": [24.4539, 54.3773], "zoom": 11, "google_maps_key": _google_key()}
 
     @app.get("/api/gazetteer", dependencies=protected)
     def gazetteer():

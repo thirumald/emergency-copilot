@@ -4,6 +4,7 @@ const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "
 const store = { get: (k) => { try { return localStorage.getItem(k) || ""; } catch { return ""; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
 let KEY = store.get("copilot_key");
 let cfg = { tile_url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png", attribution: "© OpenStreetMap contributors", center: [24.4539, 54.3773], zoom: 11 };
+let gmap = null, gLay = [], mapReady = false;
 let facilities = [], regions = [], lmap = null, facLayer = null, gazLayer = null, candLayer = null, lastPin = "";
 let callId = null, ws = null, S = null, wallWs = null, gaz = [], lastCueCount = 0;
 
@@ -21,6 +22,7 @@ function showTab(name) {
   document.querySelectorAll(".tab").forEach((b) => b.classList.toggle("active", b.dataset.tab === name));
   document.querySelectorAll(".view").forEach((v) => v.classList.toggle("hidden", v.id !== name));
   if (name === "taker" && lmap) setTimeout(() => lmap.invalidateSize(), 50);
+  if (name === "taker" && gmap) setTimeout(() => google.maps.event.trigger(gmap, "resize"), 50);
   if (name === "wall") openWall();
   if (name === "admin") loadAdmin();
 }
@@ -36,6 +38,7 @@ async function init() {
   $("#scenario").innerHTML = sc.map((s) => `<option value="${esc(s.id)}">${esc(s.title)}</option>`).join("");
   gaz = await api("/api/gazetteer");
   try { cfg = await api("/api/config"); [facilities, regions] = await Promise.all([api("/api/facilities"), api("/api/regions")]); } catch {}
+  await initGoogle(); mapReady = true; if (S) drawMap();
   const q = new URLSearchParams(location.search).get("call");
   if (q) connect(q);
 }
@@ -143,9 +146,38 @@ function render() {
 function beep() {
   try { const a = new (window.AudioContext || window.webkitAudioContext)(), o = a.createOscillator(); o.frequency.value = 880; o.connect(a.destination); o.start(); o.stop(a.currentTime + 0.15); } catch {}
 }
+// ---- Google Maps provider (key from /api/config; falls back to Leaflet / OpenStreetMap when absent or rejected)
+function loadGoogle(key) {
+  return new Promise((res, rej) => { window.__gmReady = res; window.gm_authFailure = () => rej(new Error("key rejected"));
+    const sc = document.createElement("script"); sc.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&v=weekly&loading=async&libraries=marker&callback=__gmReady`;
+    sc.async = true; sc.onerror = () => rej(new Error("load failed")); document.head.appendChild(sc); setTimeout(() => rej(new Error("timeout")), 10000); });
+}
+const gEl = (html, css) => { const d = document.createElement("div"); d.style.transform = "translateY(50%)"; const i = document.createElement("div"); i.style.cssText = css; d.appendChild(i); if (html) i.textContent = html; return d; };
+async function initGoogle() {
+  if (!cfg.google_maps_key) return;
+  try {
+    await loadGoogle(cfg.google_maps_key);
+    gmap = new google.maps.Map($("#leaflet"), { center: { lat: cfg.center[0], lng: cfg.center[1] }, zoom: cfg.zoom, mapId: "DEMO_MAP_ID", gestureHandling: "greedy" });
+    const dot = (lat, lon, col, size, title) => new google.maps.marker.AdvancedMarkerElement({ map: gmap, position: { lat, lng: lon }, title, content: gEl("", `width:${size}px;height:${size}px;border-radius:50%;background:${col};border:2px solid #fff`) });
+    gaz.forEach((g) => dot(g.lat, g.lon, "#64748b", 9, `${g.name} · ${g.name_ar}`));
+    const FC = { hospital: "#22c55e", police: "#3b82f6", civil_defence: "#f97316" };
+    facilities.forEach((f) => dot(f.lat, f.lon, FC[f.kind], 12, `${f.name} (${f.kind.replace("_", " ")})`));
+  } catch (e) { gmap = null; }
+}
+function drawGoogle(cands) {
+  gLay.forEach((o) => (o.setMap ? o.setMap(null) : (o.map = null))); gLay = [];
+  cands.forEach((c, i) => { const col = i === 0 ? "#ef4444" : "#f59e0b", sz = i === 0 ? 20 : 14;
+    gLay.push(new google.maps.marker.AdvancedMarkerElement({ map: gmap, position: { lat: c.lat, lng: c.lon }, title: `${c.name} ${Math.round(c.confidence * 100)}%`, zIndex: 10 - i, content: gEl("", `width:${sz}px;height:${sz}px;border-radius:50%;background:${col}66;border:3px solid ${col}`) })); });
+  ((S.case && S.case.facilities) || []).forEach((f) => gLay.push(new google.maps.Polyline({ map: gmap, path: [{ lat: S.case.location.lat, lng: S.case.location.lon }, { lat: f.lat, lng: f.lon }], strokeColor: "#64748b", strokeOpacity: .8, strokeWeight: 2 })));
+  if (S.aml) gLay.push(new google.maps.Circle({ map: gmap, center: { lat: S.aml.lat, lng: S.aml.lon }, radius: S.aml.accuracy_m || 100, strokeColor: "#3b82f6", strokeWeight: 1, fillColor: "#3b82f6", fillOpacity: .12 }));
+  const key = cands[0] ? `${S.call_id}:${cands[0].name}` : "";
+  if (key && key !== lastPin) { lastPin = key; gmap.setCenter({ lat: cands[0].lat, lng: cands[0].lon }); gmap.setZoom(14); }
+}
 function drawMap() {
   const cands = S.candidates || [];
   $("#cands").innerHTML = cands.length ? cands.map((c, i) => `${i === 0 ? "<b>" : ""}${esc(c.name)} ${Math.round(c.confidence * 100)}%${i === 0 ? "</b>" : ""}${c.note ? " · " + esc(c.note) : ""}`).join("<br>") : "No location yet.";
+  if (!mapReady) return;
+  if (gmap) return drawGoogle(cands);
   if (!window.L) { $("#leaflet").classList.add("hidden"); $("#map").classList.remove("hidden"); return drawSchematic(cands); }
   if (!lmap) {
     lmap = L.map("leaflet", { zoomControl: true }).setView(cfg.center, cfg.zoom);

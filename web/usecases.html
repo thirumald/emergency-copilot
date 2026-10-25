@@ -136,9 +136,11 @@ th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}th{b
 .tablewrap{overflow:auto;border-radius:16px}
 .gmap{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:12px;margin-bottom:8px}
 .gbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px}.gbar select{flex:1;min-width:220px}
+#gFrame[hidden],#gDiv[hidden]{display:none}
+#gDiv{width:100%;height:clamp(420px,66vh,820px);border-radius:14px;background:var(--surface2)}
 #gFrame{width:100%;height:clamp(420px,66vh,820px);border:0;border-radius:14px;background:var(--surface2);display:block}
-@media(max-width:700px){#gFrame{height:340px}}
-.gmap:fullscreen{display:flex;flex-direction:column;border-radius:0;padding:12px;background:var(--surface)}.gmap:fullscreen #gFrame{flex:1;height:auto}.gmap:fullscreen .note{display:none}
+@media(max-width:700px){#gFrame,#gDiv{height:340px}}
+.gmap:fullscreen{display:flex;flex-direction:column;border-radius:0;padding:12px;background:var(--surface)}.gmap:fullscreen #gFrame,.gmap:fullscreen #gDiv{flex:1;height:auto}.gmap:fullscreen .note{display:none}
 .intg{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}.ig{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:6px}
 .ig .ic{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:color-mix(in srgb,var(--brand) 14%,transparent);color:var(--brand)}.ig h3{margin:4px 0 0;font-size:16px}.ig p{margin:0;color:var(--muted);font-size:14px}.ig small{color:var(--muted);font-size:12.5px}
 .pill{align-self:flex-start;font-size:11px;font-weight:800;letter-spacing:.05em;padding:2px 9px;border-radius:99px}.pill.ok{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}.pill.plan{background:var(--surface2);color:var(--muted)}
@@ -324,6 +326,7 @@ footer .by .av{width:34px;height:34px;border-radius:50%;background:linear-gradie
       <select id="gSel" aria-label="Show on Google map"></select>
       <a class="btn" id="gOpen" target="_blank" rel="noopener"><svg class="i" aria-hidden="true"><use href="#i-pin"/></svg> Open in Google Maps</a>
       <button class="btn" id="gFull" type="button"><svg class="i" aria-hidden="true"><use href="#i-expand"/></svg> <span>Full screen</span></button></div>
+    <div id="gDiv" hidden role="application" aria-label="Google map of Abu Dhabi"></div>
     <iframe id="gFrame" title="Google map of Abu Dhabi" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
     <p class="note" style="margin:8px 4px 0">Real Google map embed (needs an internet connection; loading it shares your IP address with Google). Pick a region, demo case or facility to jump to it. For an on-premise centre the call-taker panel uses a map server you control instead.</p>
   </div>
@@ -618,16 +621,33 @@ $("#audGrid").innerHTML = D.audio.map((a) => {
     ["Civil defence", D.facilities.filter((f) => f.kind === "civil_defence").map((f) => [f.name, f.lat, f.lon, 16])]];
   const all = [];
   $("#gSel").innerHTML = opts.map(([g, items]) => `<optgroup label="${g}">${items.map((it) => { all.push(it); return `<option value="${all.length - 1}">${esc(it[0])}</option>`; }).join("")}</optgroup>`).join("");
+  const KEY = "AIzaSyDlXdILIUd5vPkDda7coYSgSS1txWcYLog";
+  let gm = null, gMarker = null;
   function show(i) {
     const [name, lat, lon, z] = all[i];
-    $("#gFrame").src = `https://maps.google.com/maps?q=${lat},${lon}(${encodeURIComponent(name.replace(/[()]/g, ""))})&z=${z}&hl=en&output=embed`;
     $("#gOpen").href = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
+    if (gm) { gm.setCenter({ lat, lng: lon }); gm.setZoom(z); gMarker.position = { lat, lng: lon }; gMarker.title = name; return; }
+    $("#gFrame").src = `https://maps.google.com/maps?q=${lat},${lon}(${encodeURIComponent(name.replace(/[()]/g, ""))})&z=${z}&hl=en&output=embed`;  // keyless fallback
+  }
+  function loadGoogleJS() {
+    return new Promise((res, rej) => { window.__gmReady = res; window.gm_authFailure = () => rej(new Error("key rejected"));
+      const sc = document.createElement("script"); sc.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(KEY)}&v=weekly&loading=async&libraries=marker&callback=__gmReady`; sc.async = true; sc.onerror = () => rej(new Error("load failed"));
+      document.head.appendChild(sc); setTimeout(() => rej(new Error("timeout")), 10000); });
+  }
+  async function useGoogleJS() {
+    if (!KEY) return;
+    try { await loadGoogleJS(); const [, lat, lon, z] = all[+$("#gSel").value || 0];
+      gm = new google.maps.Map($("#gDiv"), { center: { lat, lng: lon }, zoom: z, mapId: "DEMO_MAP_ID", gestureHandling: "greedy" });
+      gMarker = new google.maps.marker.AdvancedMarkerElement({ map: gm, position: { lat, lng: lon } });
+      $("#gDiv").hidden = false; $("#gFrame").hidden = true; $("#gFrame").removeAttribute("src"); show(+$("#gSel").value || 0);
+      document.addEventListener("fullscreenchange", () => setTimeout(() => google.maps.event.trigger(gm, "resize"), 200));
+    } catch (e) { gm = null; }  // keep the keyless embed
   }
   $("#gSel").onchange = (e) => show(+e.target.value);
   const box = document.querySelector(".gmap");
   $("#gFull").onclick = () => (document.fullscreenElement ? document.exitFullscreen() : box.requestFullscreen && box.requestFullscreen());
   document.addEventListener("fullscreenchange", () => ($("#gFull span").textContent = document.fullscreenElement ? "Exit full screen" : "Full screen"));
-  show(0);
+  show(0); useGoogleJS();
 })();
 
 /* ---------- Abu Dhabi schematic map ---------- */

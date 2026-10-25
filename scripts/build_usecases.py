@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import base64
 import json
+import os
 import sys
 import tempfile
 from pathlib import Path
@@ -81,6 +82,7 @@ def main() -> None:
     uc = json.loads((ROOT / "copilot" / "data" / "usecases.json").read_text(encoding="utf-8"))
     data["usecases"], data["ui"], data["cats"] = uc["usecases"], uc["ui"], uc["cats"]
     art = (ROOT / "web" / "art.js").read_text(encoding="utf-8")
+    gkey = json.dumps(os.environ.get("COPILOT_GOOGLE_MAPS_KEY", json.loads((ROOT / "copilot" / "data" / "maps.json").read_text(encoding="utf-8"))["google_maps_key"]))
     data["help"] = json.loads((ROOT / "copilot" / "data" / "help.json").read_text(encoding="utf-8"))["entries"]
     widget = (ROOT / "web" / "help_widget.html").read_text(encoding="utf-8")
     blob = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
@@ -89,7 +91,7 @@ def main() -> None:
         if not tpl_path.exists():
             continue
         d = data if name == "usecases" else {k: v for k, v in data.items() if k not in ("usecases", "ui", "cats", "audio", "help_unused")}
-        html = tpl_path.read_text(encoding="utf-8").replace("/*__DATA__*/null", json.dumps(d, ensure_ascii=False, separators=(",", ":"))).replace("<!--__HELP__-->", widget).replace("/*__ART__*/", art)
+        html = tpl_path.read_text(encoding="utf-8").replace("/*__DATA__*/null", json.dumps(d, ensure_ascii=False, separators=(",", ":"))).replace("<!--__HELP__-->", widget).replace("/*__ART__*/", art).replace("/*__GMAPS_KEY__*/\"\"", gkey)
         (ROOT / "web" / f"{name}.html").write_text(html, encoding="utf-8")
         print(f"web/{name}.html written ({len(html) // 1024} KB, {len(data['scenarios'])} scenarios)")
 
