@@ -63,6 +63,14 @@ Each call gets a **case record** (`casefile.py`, `GET /api/calls/{id}/case`, sho
 Reference data (`regions.json`, `facilities.json`, `agencies.json`) is demo data with approximate coordinates. In shadow mode the
 case record exposes only the non-AI parts. Unit recommendation and ETA remain Phase 2.
 
+## Use-case showcase page
+
+`web/usecases.html` is a self-contained static page (no server, no CDN, inline icons and illustrations, light/dark, responsive)
+for demos and bids: 25 use cases (17 built in the MVP, 8 roadmap) with filter and detail dialogs, a replayable simulated call,
+a schematic Abu Dhabi region map, roles, safety model, KPI targets and roadmap. The demo frames come from the real pipeline.
+Regenerate after changing scenarios or data with `python scripts/build_usecases.py` (template: `web/usecases.template.html`).
+Also served by the app at `/usecases.html`.
+
 ## Configuration
 
 | Env var | Purpose |

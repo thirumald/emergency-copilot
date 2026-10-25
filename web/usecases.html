@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Command &amp; Control Centre Use Cases</title>
+<meta name="description" content="Use cases for the AI Emergency Call Co-Pilot in a Command and Control Centre: real call scenarios, Abu Dhabi coverage, governance and roadmap.">
+<style>
+:root{
+  --bg:#f5f7fa;--surface:#ffffff;--surface2:#eef2f7;--line:#dbe2ea;--text:#14202e;--muted:#5a6b7d;
+  --brand:#2457e6;--brand-ink:#ffffff;--ok:#16a34a;--warn:#d97706;--bad:#dc2626;--shadow:0 6px 24px rgba(20,32,46,.08);
+  --medical:#ef4444;--fire:#f97316;--traffic:#ca8a04;--crime:#6366f1;--language:#0891b2;--location:#16a34a;--assist:#2457e6;--governance:#8b5cf6;--supervisor:#0ea5e9;--roadmap:#64748b;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0b121a;--surface:#131c27;--surface2:#1a2533;--line:#263344;--text:#e7eef6;--muted:#93a4b6;--brand:#5b8cff;--brand-ink:#08111d;--shadow:0 6px 24px rgba(0,0,0,.35);
+  --traffic:#eab308;--ok:#22c55e;--warn:#f59e0b;--bad:#f87171}}
+:root[data-theme="dark"]{
+  --bg:#0b121a;--surface:#131c27;--surface2:#1a2533;--line:#263344;--text:#e7eef6;--muted:#93a4b6;--brand:#5b8cff;--brand-ink:#08111d;--shadow:0 6px 24px rgba(0,0,0,.35);
+  --traffic:#eab308;--ok:#22c55e;--warn:#f59e0b;--bad:#f87171}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Arabic",sans-serif}
+a{color:var(--brand)}svg.i{width:1.25em;height:1.25em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-.2em}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.sr{position:absolute;left:-9999px}.skip:focus{left:12px;top:12px;background:var(--brand);color:var(--brand-ink);padding:8px 12px;border-radius:8px;z-index:100}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px;border-radius:6px}
+/* nav */
+.nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:18px;height:60px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;text-decoration:none;color:var(--text);white-space:nowrap}
+.logo .mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#ef4444,#f97316);display:grid;place-items:center;color:#fff}
+.nav ul{display:flex;gap:2px;list-style:none;margin:0 0 0 auto;padding:0;overflow:auto}
+.nav li a{display:block;padding:8px 12px;border-radius:8px;text-decoration:none;color:var(--muted);font-weight:600;font-size:14px;white-space:nowrap}
+.nav li a:hover{background:var(--surface2);color:var(--text)}
+.iconbtn{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:10px;width:38px;height:38px;display:grid;place-items:center;cursor:pointer}
+/* hero */
+.hero{padding:56px 0 40px;background:radial-gradient(900px 400px at 85% -10%,color-mix(in srgb,var(--brand) 18%,transparent),transparent),radial-gradient(700px 360px at 0% 0%,color-mix(in srgb,var(--fire) 14%,transparent),transparent)}
+.hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:36px;align-items:center}
+.eyebrow{display:inline-flex;gap:8px;align-items:center;padding:5px 12px;border-radius:99px;background:var(--surface);border:1px solid var(--line);font-size:13px;font-weight:700;color:var(--muted)}
+h1{font-size:clamp(30px,4.6vw,52px);line-height:1.08;margin:14px 0 14px;letter-spacing:-.02em}
+h1 em{font-style:normal;background:linear-gradient(90deg,#ef4444,#f97316);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:18px;color:var(--muted);max-width:60ch;margin:0 0 22px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:12px;font-weight:700;border:1px solid var(--line);background:var(--surface);color:var(--text);text-decoration:none;cursor:pointer;font-size:15px}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.cta{display:flex;gap:10px;flex-wrap:wrap}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:30px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+.stat b{display:block;font-size:26px;letter-spacing:-.02em}.stat span{color:var(--muted);font-size:13px}
+.hero-art{width:100%;height:auto;border-radius:20px;box-shadow:var(--shadow)}
+/* sections */
+section.block{padding:56px 0}section.alt{background:var(--surface);border-block:1px solid var(--line)}
+.kicker{color:var(--brand);font-weight:800;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+h2{font-size:clamp(24px,3vw,34px);margin:6px 0 8px;letter-spacing:-.01em}.sub{color:var(--muted);max-width:70ch;margin:0 0 26px}
+/* pipeline */
+.pipe{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;counter-reset:s}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;position:relative}
+.alt .step{background:var(--bg)}
+.step .ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;color:#fff;margin-bottom:10px}
+.step h3{margin:0 0 4px;font-size:15px}.step p{margin:0;color:var(--muted);font-size:13.5px}
+.step:not(:last-child)::after{content:"";position:absolute;right:-9px;top:34px;width:8px;height:8px;border-top:2px solid var(--muted);border-right:2px solid var(--muted);transform:rotate(45deg);z-index:2}
+/* filters + cards */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--text);padding:7px 14px;border-radius:99px;font-weight:700;font-size:14px;cursor:pointer;display:inline-flex;gap:7px;align-items:center}
+.chip[aria-pressed="true"]{background:var(--text);color:var(--bg);border-color:var(--text)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;transition:transform .15s,box-shadow .15s;text-align:left;padding:0;font:inherit;color:inherit;cursor:pointer}
+.card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.banner{height:118px;position:relative;display:grid;place-items:center;color:#fff;overflow:hidden}
+.banner svg.deco{position:absolute;inset:0;width:100%;height:100%;opacity:.25}
+.banner .big{width:54px;height:54px;stroke-width:1.5;position:relative;filter:drop-shadow(0 4px 8px rgba(0,0,0,.25))}
+.tag{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.35);color:#fff;font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:99px;letter-spacing:.03em}
+.tag.road{background:rgba(255,255,255,.9);color:#334155}
+.card .body{padding:16px 16px 18px;display:flex;flex-direction:column;gap:8px;flex:1}
+.card h3{margin:0;font-size:17px;line-height:1.25}.card p{margin:0;color:var(--muted);font-size:14.5px}
+.card .more{margin-top:auto;display:flex;align-items:center;gap:6px;color:var(--brand);font-weight:700;font-size:14px}
+.card.roadmap .banner{filter:saturate(.5)}.card.roadmap{border-style:dashed}
+.empty{display:none;color:var(--muted);padding:30px;text-align:center}
+/* modal */
+dialog{border:0;padding:0;border-radius:22px;max-width:760px;width:calc(100% - 28px);background:var(--surface);color:var(--text);box-shadow:0 30px 80px rgba(0,0,0,.45)}
+dialog::backdrop{background:rgba(5,10,16,.6);backdrop-filter:blur(3px)}
+.m-head{display:flex;gap:14px;align-items:center;padding:20px 22px;color:#fff}
+.m-head h3{margin:0;font-size:21px}.m-head small{opacity:.85}.m-head .iconbtn{margin-left:auto;background:rgba(255,255,255,.18);border-color:transparent;color:#fff}
+.m-body{padding:20px 22px 24px;display:grid;gap:16px}
+.m-body h4{margin:0 0 6px;font-size:12.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.m-body ul{margin:0;padding-left:20px}.m-body li{margin:3px 0}
+.callout{border-left:4px solid var(--ok);background:color-mix(in srgb,var(--ok) 10%,var(--surface));padding:10px 14px;border-radius:0 12px 12px 0}
+.callout.warn{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,var(--surface))}
+/* demo */
+.demo{display:grid;grid-template-columns:1fr 1.15fr;gap:16px}
+.panel{background:var(--bg);border:1px solid var(--line);border-radius:18px;padding:14px;min-height:430px}
+.alt .panel{background:var(--bg)}
+.demo-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+select{font:inherit;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 12px;max-width:100%}
+.live{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:800;color:var(--muted)}.live i{width:9px;height:9px;border-radius:50%;background:var(--bad);animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.25}}
+.tr{display:flex;flex-direction:column;gap:8px;max-height:392px;overflow:auto;padding-right:4px}
+.msg{padding:9px 12px;border-radius:14px;max-width:92%;border:1px solid var(--line);background:var(--surface);animation:pop .3s}
+.msg.calltaker{align-self:flex-end;background:color-mix(in srgb,var(--brand) 12%,var(--surface));border-color:color-mix(in srgb,var(--brand) 40%,var(--line))}
+.msg small{display:block;color:var(--muted);font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}.msg.lowq{border-style:dashed;border-color:var(--warn)}
+mark{background:color-mix(in srgb,var(--warn) 40%,transparent);color:inherit;border-radius:4px;padding:0 3px}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}}
+.cuebar{display:flex;gap:6px;flex-wrap:wrap;min-height:34px;margin-bottom:10px}
+.cue{display:inline-flex;gap:6px;align-items:center;padding:5px 10px;border-radius:99px;font-weight:800;font-size:13px;color:#fff;background:var(--bad);animation:pop .3s}.cue.high{background:var(--warn)}
+.prio{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.badge{font-size:24px;font-weight:900;padding:6px 14px;border-radius:12px;background:var(--surface2);min-width:62px;text-align:center}
+.badge.P1{background:var(--bad);color:#fff}.badge.P2{background:#f97316;color:#fff}.badge.P3{background:var(--warn);color:#fff}.badge.P4{background:var(--ok);color:#fff}
+.reasons{font-size:12.5px;color:var(--muted)}
+.fields{display:grid;gap:6px}.f{display:grid;grid-template-columns:96px 1fr 52px;gap:8px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:7px 10px;animation:pop .3s}
+.f span{color:var(--muted);font-size:12.5px}.f b{word-break:break-word}.bar{height:5px;border-radius:3px;background:var(--surface2);overflow:hidden}.bar i{display:block;height:100%;background:var(--ok)}
+.acts{display:flex;gap:4px;margin-top:2px}
+.nq{margin-top:10px;padding:10px 12px;border-radius:12px;border:1px solid var(--brand);background:color-mix(in srgb,var(--brand) 8%,var(--surface))}
+.casemini{margin-top:10px;font-size:13.5px;color:var(--muted)}.casemini b{color:var(--text)}
+.note{font-size:12.5px;color:var(--muted);margin-top:10px}
+/* map */
+.mapwrap{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:12px;position:relative}
+.mapwrap svg{width:100%;height:auto;display:block}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin:10px 4px 2px}.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.pin{animation:pulse 2s infinite;transform-origin:center;transform-box:fill-box}@keyframes pulse{50%{opacity:.35}}
+/* personas, governance, kpi, roadmap */
+.cards3{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px}.alt .tile{background:var(--bg)}
+.tile .ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;color:#fff;margin-bottom:12px}
+.tile h3{margin:0 0 6px;font-size:18px}.tile p{margin:0 0 8px;color:var(--muted);font-size:15px}.tile ul{margin:0;padding-left:18px;color:var(--text);font-size:14.5px}
+table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;font-size:15px}
+th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}th{background:var(--surface2);font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}tr:last-child td{border-bottom:0}
+.tablewrap{overflow:auto;border-radius:16px}
+.phases{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;position:relative}
+.phase{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;border-top:5px solid var(--brand)}
+.phase:nth-child(2){border-top-color:var(--governance)}.phase:nth-child(3){border-top-color:var(--fire)}
+.phase h3{margin:0}.phase small{color:var(--muted);font-weight:700}.phase ul{margin:10px 0 0;padding-left:18px;color:var(--muted)}
+.state{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:800;background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok);margin-left:6px}
+.state.todo{background:var(--surface2);color:var(--muted)}
+footer{padding:36px 0 60px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
+@media(max-width:980px){.hero .wrap,.demo{grid-template-columns:1fr}.pipe{grid-template-columns:repeat(2,1fr)}.step::after{display:none!important}.phases{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.nav ul{display:none}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<a class="sr skip" href="#usecases">Skip to use cases</a>
+
+<!-- ICON SPRITE (hand-drawn, stroke icons) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<symbol id="i-phone" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/></symbol>
+<symbol id="i-headset" viewBox="0 0 24 24"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><path d="M4 14h3v5H5a1 1 0 0 1-1-1v-4zM20 14h-3v5h2a1 1 0 0 0 1-1v-4z"/><path d="M17 19c0 1.5-2 2-5 2"/></symbol>
+<symbol id="i-pulse" viewBox="0 0 24 24"><path d="M3 12h4l2-6 4 12 2-6h6"/></symbol>
+<symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3.2 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/></symbol>
+<symbol id="i-car" viewBox="0 0 24 24"><path d="M4 16v-4l2-5h12l2 5v4M2.5 16h19"/><circle cx="7.5" cy="16.5" r="1.8"/><circle cx="16.5" cy="16.5" r="1.8"/><path d="M6 12h12"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18v.5"/></symbol>
+<symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/><path d="M8 15h8"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+<symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></symbol>
+<symbol id="i-wave" viewBox="0 0 24 24"><path d="M3 12h1M7 8v8M11 4v16M15 8v8M19 10v4M22 12h-1"/></symbol>
+<symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5z"/><path d="M19 17l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></symbol>
+<symbol id="i-db" viewBox="0 0 24 24"><path d="M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-power" viewBox="0 0 24 24"><path d="M12 3v9M6.3 6.3a8 8 0 1 0 11.4 0"/></symbol>
+<symbol id="i-file" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7V3z"/><path d="M14 3v4h4M10 13h5M10 17h5"/></symbol>
+<symbol id="i-monitor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 5a3 3 0 0 1 0 6M17 14a6 6 0 0 1 4 6"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+<symbol id="i-camera" viewBox="0 0 24 24"><path d="M3 8h4l2-3h6l2 3h4v11H3V8z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+<symbol id="i-truck" viewBox="0 0 24 24"><path d="M2 6h12v10H2zM14 9h4l4 4v3h-8"/><circle cx="6.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></symbol>
+<symbol id="i-siren" viewBox="0 0 24 24"><path d="M7 18v-6a5 5 0 0 1 10 0v6M4 18h16M12 3v2M4.5 7L6 8.5M19.5 7L18 8.5M9 21h6"/></symbol>
+<symbol id="i-translate" viewBox="0 0 24 24"><path d="M4 5h9M8.5 3v2M6 5c.5 4 3 7 6 8M11 5c-.5 3-3 7-7 9M13 21l4-10 4 10M14.5 17.5h5"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></symbol>
+<symbol id="i-grad" viewBox="0 0 24 24"><path d="M2 9l10-5 10 5-10 5-10-5z"/><path d="M6 11v5c0 1 3 3 6 3s6-2 6-3v-5"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16M8 16v-5M12 16V8M16 16v-8"/></symbol>
+<symbol id="i-building" viewBox="0 0 24 24"><path d="M5 21V4h9v17M14 9h5v12M8 8h3M8 12h3M8 16h3M3 21h18"/></symbol>
+<symbol id="i-hospital" viewBox="0 0 24 24"><path d="M4 21V6h16v15M12 9v6M9 12h6M2 21h20"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8V4z"/></symbol>
+<symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+<symbol id="i-reset" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 3-6.2M4 4v4h4"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+<symbol id="i-wifioff" viewBox="0 0 24 24"><path d="M2 8.8a15 15 0 0 1 4-2.3M22 8.8a15 15 0 0 0-8.5-3.7M5 12.5a10 10 0 0 1 3-1.8M19 12.5a10 10 0 0 0-3.2-2M9 16a5 5 0 0 1 6 0M12 20h.01M3 3l18 18"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+</defs>
+</svg>
+
+<header class="nav"><div class="wrap">
+  <a class="logo" href="#top"><span class="mark"><svg class="i"><use href="#i-siren"/></svg></span> CCC Co-Pilot</a>
+  <ul>
+    <li><a href="#how">How it works</a></li><li><a href="#usecases">Use cases</a></li><li><a href="#demo">Live demo</a></li>
+    <li><a href="#coverage">Abu Dhabi</a></li><li><a href="#roles">Roles</a></li><li><a href="#trust">Safety</a></li><li><a href="#roadmap">Roadmap</a></li>
+  </ul>
+  <button class="iconbtn" id="theme" aria-label="Toggle dark mode"><svg class="i"><use href="#i-moon"/></svg></button>
+</div></header>
+
+<main id="top">
+<section class="hero"><div class="wrap">
+  <div>
+    <span class="eyebrow"><svg class="i"><use href="#i-shield"/></svg> Human in the loop · on-premise · Arabic and English</span>
+    <h1>Every emergency call, <em>understood in seconds</em>, decided by people.</h1>
+    <p class="lead">The AI Emergency Call Co-Pilot sits beside each call-taker in the Command and Control Centre. It transcribes, listens for critical cues, finds the location and pre-fills the CAD record. The call-taker accepts, edits or rejects every field.</p>
+    <div class="cta"><a class="btn primary" href="#demo"><svg class="i"><use href="#i-play"/></svg> Watch a simulated call</a><a class="btn" href="#usecases"><svg class="i"><use href="#i-list"/></svg> Browse use cases</a></div>
+    <div class="stats">
+      <div class="stat"><b id="statUC">0</b><span>use cases covered</span></div>
+      <div class="stat"><b>3</b><span>Abu Dhabi regions</span></div>
+      <div class="stat"><b>4</b><span>Arabic dialect families</span></div>
+      <div class="stat"><b>800 ms</b><span>design latency budget (p95)</span></div>
+    </div>
+  </div>
+  <!-- hero illustration: call-taker console -->
+  <svg class="hero-art" viewBox="0 0 560 440" role="img" aria-label="Illustration of a call-taker console showing a live transcript, a map pin and a priority badge">
+    <defs><linearGradient id="hg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16233a"/><stop offset="1" stop-color="#0c1422"/></linearGradient>
+    <linearGradient id="hg2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ef4444"/><stop offset="1" stop-color="#f97316"/></linearGradient></defs>
+    <rect width="560" height="440" rx="22" fill="url(#hg)"/>
+    <g opacity=".12" stroke="#fff"><path d="M0 110h560M0 220h560M0 330h560M110 0v440M220 0v440M330 0v440M440 0v440"/></g>
+    <rect x="34" y="40" width="492" height="290" rx="16" fill="#0f1b2e" stroke="#2a3d5c" stroke-width="2"/>
+    <rect x="50" y="56" width="212" height="258" rx="10" fill="#142238"/>
+    <g font-family="system-ui" font-size="11" fill="#9db2cf"><text x="62" y="76" font-weight="700" fill="#dbe7f7">LIVE TRANSCRIPT</text></g>
+    <rect x="62" y="88" width="150" height="34" rx="9" fill="#1e3354"/><rect x="72" y="98" width="110" height="5" rx="2" fill="#6f87ad"/><rect x="72" y="108" width="70" height="5" rx="2" fill="#6f87ad"/>
+    <rect x="100" y="130" width="150" height="34" rx="9" fill="#24467a"/><rect x="110" y="140" width="120" height="5" rx="2" fill="#a9c4ee"/><rect x="110" y="150" width="60" height="5" rx="2" fill="#a9c4ee"/>
+    <rect x="62" y="172" width="170" height="44" rx="9" fill="#1e3354"/><rect x="72" y="182" width="90" height="5" rx="2" fill="#6f87ad"/><rect x="164" y="180" width="54" height="9" rx="3" fill="#f59e0b" opacity=".75"/><rect x="72" y="194" width="130" height="5" rx="2" fill="#6f87ad"/><rect x="72" y="204" width="80" height="5" rx="2" fill="#6f87ad"/>
+    <g transform="translate(62 232)"><path d="M0 24h6M10 14v20M18 4v40M26 12v24M34 18v12M42 22v4M50 8v32M58 16v16M66 22v4M74 12v24M82 20v8" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/></g>
+    <rect x="274" y="56" width="238" height="52" rx="10" fill="#3b1620" stroke="#ef4444"/><text x="290" y="78" font-family="system-ui" font-size="13" font-weight="800" fill="#fecaca">⚠ NOT BREATHING</text><text x="290" y="96" font-family="system-ui" font-size="11" fill="#fca5a5">“he is not breathing”</text>
+    <rect x="274" y="118" width="64" height="44" rx="10" fill="#ef4444"/><text x="306" y="148" text-anchor="middle" font-family="system-ui" font-size="22" font-weight="900" fill="#fff">P1</text>
+    <rect x="346" y="118" width="166" height="44" rx="10" fill="#142238"/><text x="358" y="136" font-family="system-ui" font-size="11" fill="#9db2cf">Incident</text><text x="358" y="153" font-family="system-ui" font-size="13" font-weight="700" fill="#dbe7f7">Medical emergency</text>
+    <rect x="274" y="172" width="238" height="142" rx="10" fill="#10253a"/>
+    <path d="M274 230c40-20 70 10 110-10s80-8 128-22M274 280c50-14 90 12 130-8s70-4 108-14M330 172c-10 50 20 90 6 142M440 172c10 40-10 80 4 142" stroke="#1f4a6e" stroke-width="2" fill="none"/>
+    <circle cx="420" cy="238" r="26" fill="#ef4444" opacity=".2"/><circle cx="420" cy="238" r="9" fill="#ef4444"/><circle cx="420" cy="238" r="3.5" fill="#fff"/>
+    <circle cx="352" cy="272" r="5" fill="#22c55e"/><circle cx="480" cy="204" r="5" fill="#3b82f6"/><circle cx="318" cy="198" r="5" fill="#f97316"/>
+    <rect x="224" y="334" width="112" height="14" rx="6" fill="#22344f"/><rect x="170" y="346" width="220" height="12" rx="6" fill="#1a2a42"/>
+    <!-- headset -->
+    <g transform="translate(436 336)" fill="none" stroke="url(#hg2)" stroke-width="7" stroke-linecap="round"><path d="M10 52v-8a38 38 0 0 1 76 0v8"/><rect x="4" y="50" width="16" height="30" rx="7" fill="#f97316" stroke="none"/><rect x="76" y="50" width="16" height="30" rx="7" fill="#ef4444" stroke="none"/><path d="M84 80c0 14-14 18-34 18" stroke-width="5"/></g>
+    <g transform="translate(40 352)" fill="#fff" opacity=".9" font-family="system-ui"><text font-size="13" font-weight="800" y="14">AI proposes</text><text font-size="13" y="34" fill="#9db2cf">You decide</text></g>
+  </svg>
+</div></section>
+
+<section class="block alt" id="how"><div class="wrap">
+  <span class="kicker">How it works</span><h2>From “hello” to a pre-filled CAD record</h2>
+  <p class="sub">Six stages run in parallel on every call. Rules, not AI, choose the next protocol question, and nothing reaches CAD until the call-taker accepts it.</p>
+  <div class="pipe">
+    <div class="step"><div class="ic" style="background:#2457e6"><svg class="i"><use href="#i-phone"/></svg></div><h3>1 · Call arrives</h3><p>Audio fork, caller number and handset location enter once.</p></div>
+    <div class="step"><div class="ic" style="background:#0891b2"><svg class="i"><use href="#i-mic"/></svg></div><h3>2 · Speech</h3><p>Streaming transcript, Arabic dialect and code-switch detection, quality score.</p></div>
+    <div class="step"><div class="ic" style="background:#8b5cf6"><svg class="i"><use href="#i-spark"/></svg></div><h3>3 · Understand</h3><p>Incident type, people, injuries, hazards and critical cues.</p></div>
+    <div class="step"><div class="ic" style="background:#16a34a"><svg class="i"><use href="#i-pin"/></svg></div><h3>4 · Locate</h3><p>Spoken place matched to the gazetteer, fused with handset position.</p></div>
+    <div class="step"><div class="ic" style="background:#f97316"><svg class="i"><use href="#i-list"/></svg></div><h3>5 · Guide</h3><p>Deterministic SOP rules pick the next question and tick the checklist.</p></div>
+    <div class="step"><div class="ic" style="background:#ef4444"><svg class="i"><use href="#i-db"/></svg></div><h3>6 · Confirm</h3><p>Call-taker accepts, edits or rejects. Accepted fields go to CAD and the audit log.</p></div>
+  </div>
+</div></section>
+
+<section class="block" id="usecases"><div class="wrap">
+  <span class="kicker">Use cases</span><h2>What the Command and Control Centre can do with it</h2>
+  <p class="sub">Select a card for the situation, what the Co-Pilot does and what stays with the human. Built cases come with a replayable simulated call; roadmap cards are planned and not yet built.</p>
+  <div class="filters" id="filters" role="group" aria-label="Filter use cases"></div>
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty">No use cases in this category.</div>
+</div></section>
+
+<section class="block alt" id="demo"><div class="wrap">
+  <span class="kicker">Live demo</span><h2>Replay a call, step by step</h2>
+  <p class="sub">These frames were produced by the actual extraction, location and rules code in this project, replayed from scripted calls. It is a simulation, not live audio.</p>
+  <div class="demo-bar">
+    <label class="sr" for="scSel">Scenario</label><select id="scSel"></select>
+    <button class="btn primary" id="play"><svg class="i"><use href="#i-play"/></svg><span>Play</span></button>
+    <button class="btn" id="next"><svg class="i"><use href="#i-arrow"/></svg> Next line</button>
+    <button class="btn" id="reset"><svg class="i"><use href="#i-reset"/></svg> Restart</button>
+    <span class="live"><i></i> SIMULATED CALL</span>
+  </div>
+  <div class="demo">
+    <div class="panel"><div class="kicker" style="margin-bottom:8px">Live transcript <span id="lang" style="color:var(--muted);text-transform:none;letter-spacing:0"></span></div><div class="tr" id="tr" aria-live="polite"></div></div>
+    <div class="panel">
+      <div class="cuebar" id="cues" aria-live="assertive"></div>
+      <div class="prio"><div class="badge" id="badge">–</div><div class="reasons" id="reasons">Waiting for the first caller line…</div></div>
+      <div class="fields" id="fields"></div>
+      <div class="nq" id="nq" hidden></div>
+      <div class="casemini" id="casemini"></div>
+      <div class="note">Every field above is a suggestion. In the product each one has accept, edit and reject buttons, and only accepted values reach CAD.</div>
+    </div>
+  </div>
+</div></section>
+
+<section class="block" id="coverage"><div class="wrap">
+  <span class="kicker">Abu Dhabi coverage</span><h2>Three regions, one gazetteer, nearest facilities per case</h2>
+  <p class="sub">Spoken places resolve to a region and area. Each case lists the nearest hospital, police and civil defence facility for the responding agencies. Outline is schematic for orientation only; coordinates are approximate demo data.</p>
+  <div class="mapwrap"><svg id="map" viewBox="0 0 860 500" role="img" aria-label="Schematic map of the Emirate of Abu Dhabi showing the three regions, facilities and demo case locations"></svg>
+    <div class="legend"><span><i style="background:#3b82f6"></i>Abu Dhabi Region</span><span><i style="background:#16a34a"></i>Al Ain Region</span><span><i style="background:#f97316"></i>Al Dhafra Region</span>
+    <span><i style="background:#22c55e;border-radius:50%"></i>Hospital</span><span><i style="background:#0ea5e9;border-radius:50%"></i>Police</span><span><i style="background:#eab308;border-radius:50%"></i>Civil defence</span><span><i style="background:#ef4444;border-radius:50%"></i>Demo case</span></div></div>
+</div></section>
+
+<section class="block alt" id="roles"><div class="wrap">
+  <span class="kicker">Who uses it</span><h2>One system, four roles</h2><p class="sub">&nbsp;</p>
+  <div class="cards3">
+    <div class="tile"><div class="ic" style="background:#2457e6"><svg class="i"><use href="#i-headset"/></svg></div><h3>Call-taker</h3><p>Stays on the call, not on the keyboard.</p><ul><li>Live transcript with cue words highlighted</li><li>One-click accept, edit or reject per field</li><li>Next protocol question in Arabic or English</li></ul></div>
+    <div class="tile"><div class="ic" style="background:#0ea5e9"><svg class="i"><use href="#i-monitor"/></svg></div><h3>Shift supervisor</h3><p>Sees the whole floor at once.</p><ul><li>Wall of active calls sorted by priority</li><li>Region, case number and unacknowledged cues</li><li>Silent-call flag and per-feature kill switch</li></ul></div>
+    <div class="tile"><div class="ic" style="background:#8b5cf6"><svg class="i"><use href="#i-shield"/></svg></div><h3>Safety board / auditor</h3><p>Controls when AI is allowed to assist.</p><ul><li>Shadow mode scoring against call-taker entries</li><li>Tamper-evident audit chain with verification</li><li>Written gates between rollout phases</li></ul></div>
+    <div class="tile"><div class="ic" style="background:#16a34a"><svg class="i"><use href="#i-db"/></svg></div><h3>Integrator / IT</h3><p>Plugs into what the centre already runs.</p><ul><li>CAD adapters, ASR gateway, REST and WebSocket API</li><li>Gazetteer, facility and SOP data as plain JSON</li><li>On-premise, no data leaves the centre</li></ul></div>
+  </div>
+</div></section>
+
+<section class="block" id="trust"><div class="wrap">
+  <span class="kicker">Safety and trust</span><h2>Designed so a wrong suggestion cannot dispatch anything</h2><p class="sub">&nbsp;</p>
+  <div class="cards3">
+    <div class="tile"><div class="ic" style="background:#16a34a"><svg class="i"><use href="#i-check"/></svg></div><h3>Human decides</h3><p>AI only proposes. Accepted fields are never overwritten; new AI values appear as an alternative.</p></div>
+    <div class="tile"><div class="ic" style="background:#f59e0b"><svg class="i"><use href="#i-eye"/></svg></div><h3>Shadow mode first</h3><p>The AI listens and is scored before it is allowed to show anything, and writes nothing to CAD.</p></div>
+    <div class="tile"><div class="ic" style="background:#ef4444"><svg class="i"><use href="#i-power"/></svg></div><h3>Kill switches</h3><p>Switch off extraction, location, cues, severity, SOP or CAD writes. The call-taker works exactly as today.</p></div>
+    <div class="tile"><div class="ic" style="background:#8b5cf6"><svg class="i"><use href="#i-file"/></svg></div><h3>Audit chain</h3><p>Every transcript line, suggestion, cue and decision is HMAC-chained. Edits or deletions are detected.</p></div>
+    <div class="tile"><div class="ic" style="background:#0891b2"><svg class="i"><use href="#i-wifioff"/></svg></div><h3>Low quality is flagged</h3><p>Poor audio lowers confidence and is marked for verification instead of being trusted silently.</p></div>
+    <div class="tile"><div class="ic" style="background:#64748b"><svg class="i"><use href="#i-lock"/></svg></div><h3>On-premise</h3><p>Designed for in-country deployment with access control and encrypted storage.</p></div>
+  </div>
+</div></section>
+
+<section class="block alt" id="kpi"><div class="wrap">
+  <span class="kicker">Targets</span><h2>How success is measured</h2>
+  <p class="sub">Design goals for the business case. They must be baselined on the client's own call audio during the proof of concept; nothing here is a measured result.</p>
+  <div class="tablewrap"><table><thead><tr><th>Measure</th><th>MVP target</th><th>Production target</th></tr></thead><tbody>
+    <tr><td>Critical-cue recall (a missed cue is the worst error)</td><td>≥ 95%</td><td>≥ 99%</td></tr>
+    <tr><td>Incident type, top-1 accuracy</td><td>≥ 80%</td><td>≥ 92%</td></tr>
+    <tr><td>Location correct within 100 m (with handset location)</td><td>≥ 85%</td><td>≥ 95%</td></tr>
+    <tr><td>Word error rate, Gulf Arabic telephony</td><td>≤ 25%</td><td>≤ 15%</td></tr>
+    <tr><td>Speech to field on screen (p95)</td><td>≤ 1.5 s</td><td>≤ 0.8 s</td></tr>
+    <tr><td>Fields accepted by call-takers</td><td>≥ 60%</td><td>≥ 85%</td></tr>
+    <tr><td>Reduction in answer-to-dispatch time</td><td>10%</td><td>25–30%</td></tr>
+  </tbody></table></div>
+</div></section>
+
+<section class="block" id="roadmap"><div class="wrap">
+  <span class="kicker">Roadmap</span><h2>Three phases, two safety gates</h2><p class="sub">Each gate needs written sign-off from the operational safety board.</p>
+  <div class="phases">
+    <div class="phase"><small>PHASE 1 · MVP</small><h3>Assist the call-taker <span class="state">built</span></h3><ul><li>Transcript, dialect and code-switch detection</li><li>Incident type, cues, entities, severity with reasons</li><li>Location, regions, facilities and case record</li><li>SOP guidance, CAD pre-fill, audit, shadow mode</li></ul></div>
+    <div class="phase"><small>PHASE 2 · PRODUCTION</small><h3>Dispatch and scale <span class="state todo">planned</span></h3><ul><li>Unit recommendation and multi-agency routing</li><li>CCTV auto-open, text-to-112 and chat</li><li>Translation with synthetic voice, duplicate and hoax detection</li><li>Major-incident mode, QA scoring of every call</li></ul></div>
+    <div class="phase"><small>PHASE 3 · ADVANCED</small><h3>Fuse and train <span class="state todo">planned</span></h3><ul><li>ANPR, IoT and acoustic sensor correlation</li><li>Whisper capture, eCall, sign-language relay</li><li>AI first response for queued callers</li><li>Training simulator with role-play callers</li></ul></div>
+  </div>
+</div></section>
+</main>
+
+<dialog id="dlg" aria-labelledby="dTitle"><div class="m-head" id="dHead"><svg class="i" id="dIcon" style="width:34px;height:34px"></svg><div><h3 id="dTitle"></h3><small id="dMeta"></small></div><button class="iconbtn" id="dClose" aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+<div class="m-body" id="dBody"></div></dialog>
+
+<footer><div class="wrap">Demo page for the AI Emergency Call Co-Pilot MVP. SOP text, incident taxonomy, gazetteer, facilities and hotline data are sample data with approximate coordinates and must be replaced with approved operational data before any live use. Roadmap items are plans, not delivered features. Icons and illustrations are drawn inline; the page loads nothing from the internet.</div></footer>
+
+<script>
+const D = {"scenarios":{"ar_alain_traffic":{"id":"ar_alain_traffic","title":"Gulf Arabic — rollover on Jebel Hafeet Road (Al Ain)","aml":{"lat":24.0615,"lon":55.7705,"accuracy_m":60},"frames":[{"speaker":"calltaker","text":"مركز الطوارئ، وين الحادث؟","lowq":false,"cues":[],"fields":{},"priority":{"level":"P4","score":0,"reasons":[]},"next":{"en":"Tell me exactly what happened.","ar":"قل لي بالضبط ماذا حدث؟"},"lang":"unknown","checklist":[{"q":"Tell me exactly what happened.","done":false},{"q":"What is the address of the emergency?","done":false},{"q":"What is your phone number in case we are disconnected?","done":true}],"case":{"number":"AD-2026-00001","region":null,"area":null,"agencies":[],"facilities":[]}},{"speaker":"caller","text":"حادث على طريق جبل حفيت، سيارة انقلبت وفيها اشخاص عالقين","lowq":false,"cues":[{"id":"trapped","label":"Person(s) trapped","level":"critical","evidence":"عالقين"}],"fields":{"incident_type":{"label":"Incident type","value":"Road traffic collision","conf":0.89},"priority":{"label":"Priority","value":"P2 High","conf":0.86},"location":{"label":"Location","value":"Jebel Hafeet Road","conf":0.95},"region":{"label":"Region","value":"Al Ain Region","conf":0.9}},"priority":{"level":"P2","score":60,"reasons":["Incident type: Road traffic collision +40","Person(s) trapped +20"]},"next":{"en":"Is anyone injured? Anyone trapped in a vehicle?","ar":"هل يوجد مصابون؟ هل أحد عالق في المركبة؟"},"lang":"ar/msa","checklist":[{"q":"Tell me exactly what happened.","done":true},{"q":"What is the address of the emergency?","done":true},{"q":"What is your phone number in case we are disconnected?","done":true},{"q":"Is anyone injured? Anyone trapped in a vehicle?","done":false},{"q":"How many people are involved?","done":false},{"q":"How many and what type of vehicles?","done":true},{"q":"Any fuel leak, smoke or fire?","done":false}],"case":{"number":"AD-2026-00001","region":"Al Ain Region","area":"Jebel Hafeet","agencies":[{"name":"Traffic Police","hotline":"999"},{"name":"Ambulance","hotline":"998"}],"facilities":[{"name":"Al Ain Police Station","kind":"police","km":17.3},{"name":"Al Ain Hospital","kind":"hospital","km":17.9}]}},{"speaker":"caller","text":"فيه ثلاثة اشخاص وواحد منهم ينزف وطفل صغير عمره ٤ سنوات","lowq":false,"cues":[{"id":"trapped","label":"Person(s) trapped","level":"critical","evidence":"عالقين"},{"id":"heavy_bleeding","label":"Bleeding reported","level":"high","evidence":"ينزف"},{"id":"child","label":"Child / infant involved","level":"high","evidence":"وطفل"}],"fields":{"incident_type":{"label":"Incident type","value":"Road traffic collision","conf":0.8},"priority":{"label":"Priority","value":"P1 Critical","conf":0.81},"location":{"label":"Location","value":"Jebel Hafeet Road","conf":0.95},"region":{"label":"Region","value":"Al Ain Region","conf":0.9},"persons":{"label":"People involved","value":"3","conf":0.82},"ages":{"label":"Age(s)","value":"4","conf":0.82},"injuries":{"label":"Injuries","value":"bleeding","conf":0.77}},"priority":{"level":"P1","score":100,"reasons":["Incident type: Road traffic collision +40","Bleeding reported +20","Child / infant involved +10","Person(s) trapped +20","3 people involved +10"]},"next":{"en":"Any fuel leak, smoke or fire?","ar":"هل هناك تسرب وقود أو دخان أو حريق؟"},"lang":"ar/msa","checklist":[{"q":"Tell me exactly what happened.","done":true},{"q":"What is the address of the emergency?","done":true},{"q":"What is your phone number in case we are disconnected?","done":true},{"q":"Is anyone injured? Anyone trapped in a vehicle?","done":true},{"q":"How many people are involved?","done":true},{"q":"How many and what type of vehicles?","done":true},{"q":"Any fuel leak, smoke or fire?","done":false}],"case":{"number":"AD-2026-00001","region":"Al Ain Region","area":"Jebel Hafeet","agencies":[{"name":"Traffic Police","hotline":"999"},{"name":"Ambulance","hotline":"998"}],"facilities":[{"name":"Al Ain Police Station","kind":"police","km":17.3},{"name":"Al Ain Hospital","kind":"hospital","km":17.9}]}}]},"ar_egypt_assault":{"id":"ar_egypt_assault","title":"Egyptian Arabic — knife attack, noisy line","aml":{"lat":24.3475,"lon":54.4985,"accuracy_m":300},"frames":[{"speaker":"calltaker","text":"الطوارئ، ايه اللي حصل؟","lowq":false,"cues":[],"fields":{},"priority":{"level":"P4","score":0,"reasons":[]},"next":{"en":"Tell me exactly what happened.","ar":"قل لي بالضبط ماذا حدث؟"},"lang":"unknown","checklist":[{"q":"Tell me exactly what happened.","done":false},{"q":"What is the address of the emergency?","done":false},{"q":"What is your phone number in case we are disconnected?","done":true}],"case":{"number":"AD-2026-00002","region":null,"area":null,"agencies":[],"facilities":[]}},{"speaker":"caller","text":"الحقني فيه واحد معاه سكينة بيهاجم الناس في مصفح قدام المحل ده","lowq":true,"cues":[{"id":"weapon","label":"Weapon involved","level":"critical","evidence":"سكينة"}],"fields":{"incident_type":{"label":"Incident type","value":"Crime in progress","conf":0.75},"priority":{"label":"Priority","value":"P2 High","conf":0.86},"location":{"label":"Location","value":"Mussafah","conf":0.8},"region":{"label":"Region","value":"Abu Dhabi Region","conf":0.76}},"priority":{"level":"P2","score":65,"reasons":["Incident type: Crime in progress +40","Weapon involved +25"]},"next":{"en":"Is the suspect still there? Which way did they go?","ar":"هل المشتبه به لا يزال موجوداً؟ وإلى أين ذهب؟"},"lang":"ar/egyptian","checklist":[{"q":"Tell me exactly what happened.","done":true},{"q":"What is the address of the emergency?","done":true},{"q":"What is your phone number in case we are disconnected?","done":true},{"q":"Does anyone have a weapon?","done":true},{"q":"Is the suspect still there? Which way did they go?","done":false},{"q":"Is anyone injured?","done":false},{"q":"How many people are involved?","done":false}],"case":{"number":"AD-2026-00002","region":"Abu Dhabi Region","area":"Mussafah & Mainland","agencies":[{"name":"Police","hotline":"999"}],"facilities":[{"name":"Mussafah Police Station","kind":"police","km":0.9}]}},{"speaker":"caller","text":"واحد اتصاب وبينزف وهو لسه موجود هنا","lowq":false,"cues":[{"id":"weapon","label":"Weapon involved","level":"critical","evidence":"سكينة"},{"id":"heavy_bleeding","label":"Bleeding reported","level":"high","evidence":"وبينزف"}],"fields":{"incident_type":{"label":"Incident type","value":"Crime in progress","conf":0.75},"priority":{"label":"Priority","value":"P1 Critical","conf":0.81},"location":{"label":"Location","value":"Mussafah","conf":0.88},"region":{"label":"Region","value":"Abu Dhabi Region","conf":0.83},"injuries":{"label":"Injuries","value":"bleeding, injured","conf":0.71}},"priority":{"level":"P1","score":85,"reasons":["Incident type: Crime in progress +40","Bleeding reported +20","Weapon involved +25"]},"next":{"en":"How many people are involved?","ar":"كم عدد الأشخاص المعنيين؟"},"lang":"ar/egyptian","checklist":[{"q":"Tell me exactly what happened.","done":true},{"q":"What is the address of the emergency?","done":true},{"q":"What is your phone number in case we are disconnected?","done":true},{"q":"Does anyone have a weapon?","done":true},{"q":"Is the suspect still there? Which way did they go?","done":true},{"q":"Is anyone injured?","done":true},{"q":"How many people are involved?","done":false}],"case":{"number":"AD-2026-00002","region":"Abu Dhabi Region","area":"Mussafah & Mainland","agencies":[{"name":"Police","hotline":"999"},{"name":"Ambulance","hotline":"998","reason":"medical cue"}],"facilities":[{"name":"Mussafah Police Station","kind":"police","km":0.9},{"name":"Mafraq Hospital","kind":"hospital","km":4.8}]}}]},"ar_gulf_fire":{"id":"ar_gulf_fire","title":"Gulf Arabic + English — building fire","aml":{"lat":24.4806,"lon":54.3602,"accuracy_m":120},"frames":[{"speaker":"calltaker","text":"مركز الطوارئ، شنو الموقع؟","lowq":false,"cues":[],"fields":{},"priority":{"level":"P4","score":0,"reasons":[]},"next":{"en":"Tell me exactly what happened.","ar":"قل لي بالضبط ماذا حدث؟"},"lang":"unknown","checklist":[{"q":"Tell me exactly what happened.","done":false},{"q":"What is the address of the emergency?","done":false},{"q":"What is your phone number in case we are disconnected?","done":true}],"case":{"number":"AD-2026-00003","region":null,"area":null,"agencies":[],"facilities":[]}},{"speaker":"caller","text":"الحقونا فيه حريق في building في شارع الشيخ زايد والنار تنتشر بسرعة","lowq":false,"cues":[{"id":"fire_spreading","label":"Fire spreading / explosion","level":"critical","evidence":"تنتشر"}],"fields":{"incident_type":{"label":"Incident type","value":"Fire","conf":0.94},"priority":{"label":"Priority","value":"P2 High","conf":0.89},"location":{"label":"Location","value":"Sheikh Zayed bin Sultan Street","conf":0.95},"region":{"label":"Region","value":"Abu Dhabi Region","conf":0.9}},"priority":{"level":"P2","score":65,"reasons":["Incident type: Fire +45","Fire spreading / explosion +20"]},"next":{"en":"Is anyone inside or trapped?","ar":"هل يوجد أحد في الداخل أو عالق؟"},"lang":"mixed/msa · code-switched","checklist":[{"q":"Tell me exactly what happened.","done":true},{"q":"What is the address of the emergency?","done":true},{"q":"What is your phone number in case we are disconnected?","done":true},{"q":"Is anyone inside or trapped?","done":false},{"q":"How many people are inside?","done":false},{"q":"Is the fire spreading? How big is it?","done":true},{"q":"Any gas, chemicals or explosives nearby?","done":false}],"case":{"number":"AD-2026-00003","region":"Abu Dhabi Region","area":"Abu Dhabi Island","agencies":[{"name":"Civil Defence","hotline":"997"}],"facilities":[{"name":"Abu Dhabi Civil Defence Centre","kind":"civil_defence","km":2.3}]}},{"speaker":"caller","text":"الحين في ناس عالقين فوق في الدور الخامس وعيال صغار، والدخان كثير","lowq":false,"cues":[{"id":"fire_spreading","label":"Fire spreading / explosion","level":"critical","evidence":"تنتشر"},{"id":"child","label":"Child / infant involved","level":"high","evidence":"وعيال"},{"id":"trapped","label":"Person(s) trapped","level":"critical","evidence":"عالقين"}],"fields":{"incident_type":{"label":"Incident type","value":"Fire","conf":0.94},"priority":{"label":"Priority","value":"P1 Critical","conf":0.9},"location":{"label":"Location","value":"Sheikh Zayed bin Sultan Street","conf":0.95},"region":{"label":"Region","value":"Abu Dhabi Region","conf":0.9},"address_detail":{"label":"Building / floor","value":"floor 5","conf":0.77},"hazards":{"label":"Hazards","value":"smoke","conf":0.77}},"priority":{"level":"P1","score":95,"reasons":["Incident type: Fire +45","Child / infant involved +10","Fire spreading / explosion +20","Person(s) trapped +20"]},"next":{"en":"How many people are inside?","ar":"كم عدد الأشخاص في الداخل؟"},"lang":"mixed/gulf · code-switched","checklist":[{"q":"Tell me exactly what happened.","done":true},{"q":"What is the address of the emergency?","done":true},{"q":"What is your phone number in case we are disconnected?","done":true},{"q":"Is anyone inside or trapped?","done":true},{"q":"How many people are inside?","done":false},{"q":"Is the fire spreading? How big is it?","done":true},{"q":"Any gas, chemicals or explosives nearby?","done":true}],"case":{"number":"AD-2026-00003","region":"Abu Dhabi Region","area":"Abu Dhabi Island","agencies":[{"name":"Civil Defence","hotline":"997"}],"facilities":[{"name":"Abu Dhabi Civil Defence Centre","kind":"civil_defence","km":2.3}]}},{"speaker":"calltaker","text":"كم شخص عالق؟","lowq":false,"cues":[{"id":"fire_spreading","label":"Fire spreading / explosion","level":"critical","evidence":"تنتشر"},{"id":"child","label":"Child / infant involved","level":"high","evidence":"وعيال"},{"id":"trapped","label":"Person(s) trapped","level":"critical","evidence":"عالقين"}],"fields":{"incident_type":{"label":"Incident type","value":"Fire","conf":0.94},"priority":{"label":"Priority","value":"P1 Critical","conf":0.9},"location":{"label":"Location","value":"Sheikh Zayed bin Sultan Street","conf":0.95},"region":{"label":"Region","value":"Abu Dhabi Region","conf":0.9},"address_detail":{"label":"Building / floor","value":"floor 5","conf":0.77},"hazards":{"label":"Hazards","value":"smoke","conf":0.77}},"priority":{"level":"P1","score":95,"reasons":["Incident type: Fire +45","Child / infant involved +10","Fire spreading / explosion +20","Person(s) trapped +20"]},"next":{"en":"How many people are inside?","ar":"كم عدد الأشخاص في الداخل؟"},"lang":"mixed/gulf · code-switched","checklist":[{"q":"Tell me exactly what happened.","done":true},{"q":"What is the address of the emergency?","done":true},{"q":"What is your phone number in case we are disconnected?","done":true},{"q":"Is anyone inside or trapped?","done":true},{"q":"How many people are inside?","done":false},{"q":"Is the fire spreading? How big is it?","done":true},{"q":"Any gas, chemicals or explosives nearby?","done":true}],"case":{"number":"AD-2026-00003","region":"Abu Dhabi Region","area":"Abu Dhabi Island","agencies":[{"name":"Civil Defence","hotline":"997"}],"facilities":[{"name":"Abu Dhabi Civil Defence Centre","kind":"civil_defence","km":2.3}]}},{"speaker":"caller","text":"يمكن خمسة اشخاص، ما نقدر نطلع","lowq":false,"cues":[{"id":"fire_spreading","label":"Fire spreading / explosion","level":"critical","evidence":"تنتشر"},{"id":"child","label":"Child / infant involved","level":"high","evidence":"وعيال"},{"id":"trapped","label":"Person(s) trapped","level":"critical","evidence":"عالقين"}],"fields":{"incident_type":{"label":"Incident type","value":"Fire","conf":0.94},"priority":{"label":"Priority","value":"P1 Critical","conf":0.9},"location":{"label":"Location","value":"Sheikh Zayed bin Sultan Street","conf":0.95},"region":{"label":"Region","value":"Abu Dhabi Region","conf":0.9},"address_detail":{"label":"Building / floor","value":"floor 5","conf":0.77},"persons":{"label":"People involved","value":"5","conf":0.82},"hazards":{"label":"Hazards","value":"smoke","conf":0.77}},"priority":{"level":"P1","score":100,"reasons":["Incident type: Fire +45","Child / infant involved +10","Fire spreading / explosion +20","Person(s) trapped +20","5 people involved +10"]},"next":null,"lang":"mixed/gulf · code-switched","checklist":[{"q":"Tell me exactly what happened.","done":true},{"q":"What is the address of the emergency?","done":true},{"q":"What is your phone number in case we are disconnected?","done":true},{"q":"Is anyone inside or trapped?","done":true},{"q":"How many people are inside?","done":true},{"q":"Is the fire spreading? How big is it?","done":true},{"q":"Any gas, chemicals or explosives nearby?","done":true}],"case":{"number":"AD-2026-00003","region":"Abu Dhabi Region","area":"Abu Dhabi Island","agencies":[{"name":"Civil Defence","hotline":"997"}],"facilities":[{"name":"Abu Dhabi Civil Defence Centre","kind":"civil_defence","km":2.3}]}}]},"ar_levant_traffic":{"id":"ar_levant_traffic","title":"Levantine Arabic — road collision (no AML)","aml":null,"frames":[{"speaker":"calltaker","text":"مركز الطوارئ، شو صار؟","lowq":false,"cues":[],"fields":{},"priority":{"level":"P4","score":0,"reasons":[]},"next":{"en":"Tell me exactly what happened.","ar":"قل لي بالضبط ماذا حدث؟"},"lang":"unknown","checklist":[{"q":"Tell me exactly what happened.","done":false},{"q":"What is the address of the emergency?","done":false},{"q":"What is your phone number in case we are disconnected?","done":true}],"case":{"number":"AD-2026-00004","region":null,"area":null,"agencies":[],"facilities":[]}},{"speaker":"caller","text":"في حادث كتير قوي هلق على طريق المطار، سيارتين تصادموا وواحد عم ينزف","lowq":false,"cues":[{"id":"heavy_bleeding","label":"Bleeding reported","level":"high","evidence":"ينزف"}],"fields":{"incident_type":{"label":"Incident type","value":"Road traffic collision","conf":0.8},"priority":{"label":"Priority","value":"P2 High","conf":0.81},"location":{"label":"Location","value":"Airport Road","conf":0.91},"region":{"label":"Region","value":"Abu Dhabi Region","conf":0.87},"injuries":{"label":"Injuries","value":"bleeding","conf":0.77}},"priority":{"level":"P2","score":60,"reasons":["Incident type: Road traffic collision +40","Bleeding reported +20"]},"next":{"en":"How many people are involved?","ar":"كم عدد الأشخاص المتأثرين؟"},"lang":"ar/levantine","checklist":[{"q":"Tell me exactly what happened.","done":true},{"q":"What is the address of the emergency?","done":true},{"q":"What is your phone number in case we are disconnected?","done":true},{"q":"Is anyone injured? Anyone trapped in a vehicle?","done":true},{"q":"How many people are involved?","done":false},{"q":"How many and what type of vehicles?","done":true},{"q":"Any fuel leak, smoke or fire?","done":false}],"case":{"number":"AD-2026-00004","region":"Abu Dhabi Region","area":"Abu Dhabi Island","agencies":[{"name":"Traffic Police","hotline":"999"},{"name":"Ambulance","hotline":"998"}],"facilities":[{"name":"Abu Dhabi Police HQ","kind":"police","km":2.6},{"name":"Sheikh Khalifa Medical City","kind":"hospital","km":2.1}]}},{"speaker":"caller","text":"في طفل بالسيارة عمره ٦ سنوات وما عم يرد علينا","lowq":false,"cues":[{"id":"heavy_bleeding","label":"Bleeding reported","level":"high","evidence":"ينزف"},{"id":"unconscious","label":"Unconscious / unresponsive","level":"critical","evidence":"وما عم يرد"},{"id":"child","label":"Child / infant involved","level":"high","evidence":"طفل"}],"fields":{"incident_type":{"label":"Incident type","value":"Road traffic collision","conf":0.63},"priority":{"label":"Priority","value":"P1 Critical","conf":0.73},"location":{"label":"Location","value":"Airport Road","conf":0.91},"region":{"label":"Region","value":"Abu Dhabi Region","conf":0.87},"ages":{"label":"Age(s)","value":"6","conf":0.82},"injuries":{"label":"Injuries","value":"bleeding","conf":0.77}},"priority":{"level":"P1","score":100,"reasons":["Incident type: Road traffic collision +40","Unconscious / unresponsive +30","Bleeding reported +20","Child / infant involved +10"]},"next":{"en":"How many people are involved?","ar":"كم عدد الأشخاص المتأثرين؟"},"lang":"ar/levantine","checklist":[{"q":"Tell me exactly what happened.","done":true},{"q":"What is the address of the emergency?","done":true},{"q":"What is your phone number in case we are disconnected?","done":true},{"q":"Is anyone injured? Anyone trapped in a vehicle?","done":true},{"q":"How many people are involved?","done":false},{"q":"How many and what type of vehicles?","done":true},{"q":"Any fuel leak, smoke or fire?","done":false}],"case":{"number":"AD-2026-00004","region":"Abu Dhabi Region","area":"Abu Dhabi Island","agencies":[{"name":"Traffic Police","hotline":"999"},{"name":"Ambulance","hotline":"998"}],"facilities":[{"name":"Abu Dhabi Police HQ","kind":"police","km":2.6},{"name":"Sheikh Khalifa Medical City","kind":"hospital","km":2.1}]}}]},"en_cardiac":{"id":"en_cardiac","title":"English — cardiac arrest at home","aml":{"lat":24.4883,"lon":54.3664,"accuracy_m":40},"frames":[{"speaker":"calltaker","text":"Emergency services, what is the address of your emergency?","lowq":false,"cues":[],"fields":{},"priority":{"level":"P4","score":0,"reasons":[]},"next":{"en":"Tell me exactly what happened.","ar":"قل لي بالضبط ماذا حدث؟"},"lang":"unknown","checklist":[{"q":"Tell me exactly what happened.","done":false},{"q":"What is the address of the emergency?","done":false},{"q":"What is your phone number in case we are disconnected?","done":true}],"case":{"number":"AD-2026-00005","region":null,"area":null,"agencies":[],"facilities":[]}},{"speaker":"caller","text":"Please hurry, my father collapsed and he is not breathing","lowq":false,"cues":[{"id":"not_breathing","label":"Not breathing / no pulse","level":"critical","evidence":"not breathing"},{"id":"unconscious","label":"Unconscious / unresponsive","level":"critical","evidence":"collapsed"}],"fields":{"incident_type":{"label":"Incident type","value":"Medical emergency","conf":0.86},"priority":{"label":"Priority","value":"P1 Critical","conf":0.85},"location":{"label":"Location","value":"Handset location (AML)","conf":0.94},"region":{"label":"Region","value":"Abu Dhabi Region","conf":0.89},"injuries":{"label":"Injuries","value":"unconscious","conf":0.77}},"priority":{"level":"P1","score":100,"reasons":["Incident type: Medical emergency +40","Not breathing / no pulse +40","Unconscious / unresponsive +30"]},"next":{"en":"What is the address of the emergency?","ar":"ما هو عنوان الحادث؟"},"lang":"en","checklist":[{"q":"Tell me exactly what happened.","done":true},{"q":"What is the address of the emergency?","done":false},{"q":"What is your phone number in case we are disconnected?","done":true},{"q":"How old is the patient?","done":false},{"q":"Is the patient awake and breathing normally?","done":true},{"q":"What is the main problem? Any pain or bleeding?","done":true},{"q":"How many people need help?","done":false}],"case":{"number":"AD-2026-00005","region":"Abu Dhabi Region","area":"Abu Dhabi Island","agencies":[{"name":"Ambulance","hotline":"998"}],"facilities":[{"name":"Corniche Hospital","kind":"hospital","km":1.7}]}},{"speaker":"caller","text":"We are on Hamdan Street, building 14, second floor","lowq":false,"cues":[{"id":"not_breathing","label":"Not breathing / no pulse","level":"critical","evidence":"not breathing"},{"id":"unconscious","label":"Unconscious / unresponsive","level":"critical","evidence":"collapsed"}],"fields":{"incident_type":{"label":"Incident type","value":"Medical emergency","conf":0.86},"priority":{"label":"Priority","value":"P1 Critical","conf":0.85},"location":{"label":"Location","value":"Hamdan Street","conf":0.95},"region":{"label":"Region","value":"Abu Dhabi Region","conf":0.89},"address_detail":{"label":"Building / floor","value":"building 14, floor 2","conf":0.77},"injuries":{"label":"Injuries","value":"unconscious","conf":0.77}},"priority":{"level":"P1","score":100,"reasons":["Incident type: Medical emergency +40","Not breathing / no pulse +40","Unconscious / unresponsive +30"]},"next":{"en":"How old is the patient?","ar":"كم عمر المريض؟"},"lang":"en","checklist":[{"q":"Tell me exactly what happened.","done":true},{"q":"What is the address of the emergency?","done":true},{"q":"What is your phone number in case we are disconnected?","done":true},{"q":"How old is the patient?","done":false},{"q":"Is the patient awake and breathing normally?","done":true},{"q":"What is the main problem? Any pain or bleeding?","done":true},{"q":"How many people need help?","done":false}],"case":{"number":"AD-2026-00005","region":"Abu Dhabi Region","area":"Abu Dhabi Island","agencies":[{"name":"Ambulance","hotline":"998"}],"facilities":[{"name":"Corniche Hospital","kind":"hospital","km":1.6}]}},{"speaker":"calltaker","text":"Stay on the line. How old is he?","lowq":false,"cues":[{"id":"not_breathing","label":"Not breathing / no pulse","level":"critical","evidence":"not breathing"},{"id":"unconscious","label":"Unconscious / unresponsive","level":"critical","evidence":"collapsed"}],"fields":{"incident_type":{"label":"Incident type","value":"Medical emergency","conf":0.86},"priority":{"label":"Priority","value":"P1 Critical","conf":0.85},"location":{"label":"Location","value":"Hamdan Street","conf":0.95},"region":{"label":"Region","value":"Abu Dhabi Region","conf":0.89},"address_detail":{"label":"Building / floor","value":"building 14, floor 2","conf":0.77},"injuries":{"label":"Injuries","value":"unconscious","conf":0.77}},"priority":{"level":"P1","score":100,"reasons":["Incident type: Medical emergency +40","Not breathing / no pulse +40","Unconscious / unresponsive +30"]},"next":{"en":"How old is the patient?","ar":"كم عمر المريض؟"},"lang":"en","checklist":[{"q":"Tell me exactly what happened.","done":true},{"q":"What is the address of the emergency?","done":true},{"q":"What is your phone number in case we are disconnected?","done":true},{"q":"How old is the patient?","done":false},{"q":"Is the patient awake and breathing normally?","done":true},{"q":"What is the main problem? Any pain or bleeding?","done":true},{"q":"How many people need help?","done":false}],"case":{"number":"AD-2026-00005","region":"Abu Dhabi Region","area":"Abu Dhabi Island","agencies":[{"name":"Ambulance","hotline":"998"}],"facilities":[{"name":"Corniche Hospital","kind":"hospital","km":1.6}]}},{"speaker":"caller","text":"He is sixty eight years old. He had chest pain and then fell, he is unconscious","lowq":false,"cues":[{"id":"not_breathing","label":"Not breathing / no pulse","level":"critical","evidence":"not breathing"},{"id":"unconscious","label":"Unconscious / unresponsive","level":"critical","evidence":"collapsed"}],"fields":{"incident_type":{"label":"Incident type","value":"Medical emergency","conf":0.93},"priority":{"label":"Priority","value":"P1 Critical","conf":0.85},"location":{"label":"Location","value":"Hamdan Street","conf":0.95},"region":{"label":"Region","value":"Abu Dhabi Region","conf":0.89},"address_detail":{"label":"Building / floor","value":"building 14, floor 2","conf":0.77},"ages":{"label":"Age(s)","value":"68","conf":0.82},"injuries":{"label":"Injuries","value":"chest pain, unconscious","conf":0.77}},"priority":{"level":"P1","score":100,"reasons":["Incident type: Medical emergency +40","Not breathing / no pulse +40","Unconscious / unresponsive +30"]},"next":{"en":"How many people need help?","ar":"كم عدد الأشخاص الذين يحتاجون مساعدة؟"},"lang":"en","checklist":[{"q":"Tell me exactly what happened.","done":true},{"q":"What is the address of the emergency?","done":true},{"q":"What is your phone number in case we are disconnected?","done":true},{"q":"How old is the patient?","done":true},{"q":"Is the patient awake and breathing normally?","done":true},{"q":"What is the main problem? Any pain or bleeding?","done":true},{"q":"How many people need help?","done":false}],"case":{"number":"AD-2026-00005","region":"Abu Dhabi Region","area":"Abu Dhabi Island","agencies":[{"name":"Ambulance","hotline":"998"}],"facilities":[{"name":"Corniche Hospital","kind":"hospital","km":1.6}]}},{"speaker":"calltaker","text":"Is anyone else hurt?","lowq":false,"cues":[{"id":"not_breathing","label":"Not breathing / no pulse","level":"critical","evidence":"not breathing"},{"id":"unconscious","label":"Unconscious / unresponsive","level":"critical","evidence":"collapsed"}],"fields":{"incident_type":{"label":"Incident type","value":"Medical emergency","conf":0.93},"priority":{"label":"Priority","value":"P1 Critical","conf":0.85},"location":{"label":"Location","value":"Hamdan Street","conf":0.95},"region":{"label":"Region","value":"Abu Dhabi Region","conf":0.89},"address_detail":{"label":"Building / floor","value":"building 14, floor 2","conf":0.77},"ages":{"label":"Age(s)","value":"68","conf":0.82},"injuries":{"label":"Injuries","value":"chest pain, unconscious","conf":0.77}},"priority":{"level":"P1","score":100,"reasons":["Incident type: Medical emergency +40","Not breathing / no pulse +40","Unconscious / unresponsive +30"]},"next":{"en":"How many people need help?","ar":"كم عدد الأشخاص الذين يحتاجون مساعدة؟"},"lang":"en","checklist":[{"q":"Tell me exactly what happened.","done":true},{"q":"What is the address of the emergency?","done":true},{"q":"What is your phone number in case we are disconnected?","done":true},{"q":"How old is the patient?","done":true},{"q":"Is the patient awake and breathing normally?","done":true},{"q":"What is the main problem? Any pain or bleeding?","done":true},{"q":"How many people need help?","done":false}],"case":{"number":"AD-2026-00005","region":"Abu Dhabi Region","area":"Abu Dhabi Island","agencies":[{"name":"Ambulance","hotline":"998"}],"facilities":[{"name":"Corniche Hospital","kind":"hospital","km":1.6}]}},{"speaker":"caller","text":"No, just him. There are two of us here, me and my mother","lowq":false,"cues":[{"id":"not_breathing","label":"Not breathing / no pulse","level":"critical","evidence":"not breathing"},{"id":"unconscious","label":"Unconscious / unresponsive","level":"critical","evidence":"collapsed"}],"fields":{"incident_type":{"label":"Incident type","value":"Medical emergency","conf":0.93},"priority":{"label":"Priority","value":"P1 Critical","conf":0.85},"location":{"label":"Location","value":"Hamdan Street","conf":0.95},"region":{"label":"Region","value":"Abu Dhabi Region","conf":0.89},"address_detail":{"label":"Building / floor","value":"building 14, floor 2","conf":0.77},"persons":{"label":"People involved","value":"2","conf":0.82},"ages":{"label":"Age(s)","value":"68","conf":0.82},"injuries":{"label":"Injuries","value":"chest pain, unconscious","conf":0.77}},"priority":{"level":"P1","score":100,"reasons":["Incident type: Medical emergency +40","Not breathing / no pulse +40","Unconscious / unresponsive +30"]},"next":null,"lang":"en","checklist":[{"q":"Tell me exactly what happened.","done":true},{"q":"What is the address of the emergency?","done":true},{"q":"What is your phone number in case we are disconnected?","done":true},{"q":"How old is the patient?","done":true},{"q":"Is the patient awake and breathing normally?","done":true},{"q":"What is the main problem? Any pain or bleeding?","done":true},{"q":"How many people need help?","done":true}],"case":{"number":"AD-2026-00005","region":"Abu Dhabi Region","area":"Abu Dhabi Island","agencies":[{"name":"Ambulance","hotline":"998"}],"facilities":[{"name":"Corniche Hospital","kind":"hospital","km":1.6}]}}]},"en_dhafra_gas":{"id":"en_dhafra_gas","title":"English — gas leak and fire, Ruwais (Al Dhafra)","aml":{"lat":24.1192,"lon":52.7208,"accuracy_m":80},"frames":[{"speaker":"calltaker","text":"Emergency services, what is happening?","lowq":false,"cues":[],"fields":{},"priority":{"level":"P4","score":0,"reasons":[]},"next":{"en":"Tell me exactly what happened.","ar":"قل لي بالضبط ماذا حدث؟"},"lang":"unknown","checklist":[{"q":"Tell me exactly what happened.","done":false},{"q":"What is the address of the emergency?","done":false},{"q":"What is your phone number in case we are disconnected?","done":true}],"case":{"number":"AD-2026-00006","region":null,"area":null,"agencies":[],"facilities":[]}},{"speaker":"caller","text":"There is a gas leak and a fire at the Ruwais industrial area, the fire is spreading","lowq":false,"cues":[{"id":"fire_spreading","label":"Fire spreading / explosion","level":"critical","evidence":"spreading"},{"id":"hazard_gas","label":"Gas / chemical hazard","level":"high","evidence":"gas leak"}],"fields":{"incident_type":{"label":"Incident type","value":"Fire","conf":0.78},"priority":{"label":"Priority","value":"P1 Critical","conf":0.81},"location":{"label":"Location","value":"Ruwais Industrial Area","conf":0.95},"region":{"label":"Region","value":"Al Dhafra Region","conf":0.9},"hazards":{"label":"Hazards","value":"gas","conf":0.77}},"priority":{"level":"P1","score":80,"reasons":["Incident type: Fire +45","Fire spreading / explosion +20","Gas / chemical hazard +15"]},"next":{"en":"Is anyone inside or trapped?","ar":"هل يوجد أحد في الداخل أو عالق؟"},"lang":"en","checklist":[{"q":"Tell me exactly what happened.","done":true},{"q":"What is the address of the emergency?","done":true},{"q":"What is your phone number in case we are disconnected?","done":true},{"q":"Is anyone inside or trapped?","done":false},{"q":"How many people are inside?","done":false},{"q":"Is the fire spreading? How big is it?","done":true},{"q":"Any gas, chemicals or explosives nearby?","done":true}],"case":{"number":"AD-2026-00006","region":"Al Dhafra Region","area":"Ruwais","agencies":[{"name":"Civil Defence","hotline":"997"}],"facilities":[{"name":"Ruwais Civil Defence Centre","kind":"civil_defence","km":1.6}]}},{"speaker":"calltaker","text":"Is anyone inside?","lowq":false,"cues":[{"id":"fire_spreading","label":"Fire spreading / explosion","level":"critical","evidence":"spreading"},{"id":"hazard_gas","label":"Gas / chemical hazard","level":"high","evidence":"gas leak"}],"fields":{"incident_type":{"label":"Incident type","value":"Fire","conf":0.78},"priority":{"label":"Priority","value":"P1 Critical","conf":0.81},"location":{"label":"Location","value":"Ruwais Industrial Area","conf":0.95},"region":{"label":"Region","value":"Al Dhafra Region","conf":0.9},"hazards":{"label":"Hazards","value":"gas","conf":0.77}},"priority":{"level":"P1","score":80,"reasons":["Incident type: Fire +45","Fire spreading / explosion +20","Gas / chemical hazard +15"]},"next":{"en":"Is anyone inside or trapped?","ar":"هل يوجد أحد في الداخل أو عالق؟"},"lang":"en","checklist":[{"q":"Tell me exactly what happened.","done":true},{"q":"What is the address of the emergency?","done":true},{"q":"What is your phone number in case we are disconnected?","done":true},{"q":"Is anyone inside or trapped?","done":false},{"q":"How many people are inside?","done":false},{"q":"Is the fire spreading? How big is it?","done":true},{"q":"Any gas, chemicals or explosives nearby?","done":true}],"case":{"number":"AD-2026-00006","region":"Al Dhafra Region","area":"Ruwais","agencies":[{"name":"Civil Defence","hotline":"997"}],"facilities":[{"name":"Ruwais Civil Defence Centre","kind":"civil_defence","km":1.6}]}},{"speaker":"caller","text":"Yes, two workers are trapped inside the plant","lowq":false,"cues":[{"id":"fire_spreading","label":"Fire spreading / explosion","level":"critical","evidence":"spreading"},{"id":"hazard_gas","label":"Gas / chemical hazard","level":"high","evidence":"gas leak"},{"id":"trapped","label":"Person(s) trapped","level":"critical","evidence":"trapped"}],"fields":{"incident_type":{"label":"Incident type","value":"Fire","conf":0.78},"priority":{"label":"Priority","value":"P1 Critical","conf":0.81},"location":{"label":"Location","value":"Ruwais Industrial Area","conf":0.95},"region":{"label":"Region","value":"Al Dhafra Region","conf":0.9},"persons":{"label":"People involved","value":"2","conf":0.82},"hazards":{"label":"Hazards","value":"gas","conf":0.77}},"priority":{"level":"P1","score":100,"reasons":["Incident type: Fire +45","Fire spreading / explosion +20","Person(s) trapped +20","Gas / chemical hazard +15"]},"next":null,"lang":"en","checklist":[{"q":"Tell me exactly what happened.","done":true},{"q":"What is the address of the emergency?","done":true},{"q":"What is your phone number in case we are disconnected?","done":true},{"q":"Is anyone inside or trapped?","done":true},{"q":"How many people are inside?","done":true},{"q":"Is the fire spreading? How big is it?","done":true},{"q":"Any gas, chemicals or explosives nearby?","done":true}],"case":{"number":"AD-2026-00006","region":"Al Dhafra Region","area":"Ruwais","agencies":[{"name":"Civil Defence","hotline":"997"}],"facilities":[{"name":"Ruwais Civil Defence Centre","kind":"civil_defence","km":1.6}]}}]}},"places":[{"name":"Sheikh Zayed bin Sultan Street","name_ar":"شارع الشيخ زايد بن سلطان","type":"street","lat":24.4803,"lon":54.3598,"region":"Abu Dhabi Region"},{"name":"Hamdan Street","name_ar":"شارع حمدان","type":"street","lat":24.488,"lon":54.366,"region":"Abu Dhabi Region"},{"name":"Airport Road","name_ar":"شارع المطار","type":"street","lat":24.456,"lon":54.383,"region":"Abu Dhabi Region"},{"name":"Corniche Road","name_ar":"الكورنيش","type":"street","lat":24.472,"lon":54.34,"region":"Abu Dhabi Region"},{"name":"Al Khalidiyah","name_ar":"الخالدية","type":"district","lat":24.472,"lon":54.347,"region":"Abu Dhabi Region"},{"name":"Al Bateen","name_ar":"البطين","type":"district","lat":24.456,"lon":54.335,"region":"Abu Dhabi Region"},{"name":"Al Mushrif","name_ar":"المشرف","type":"district","lat":24.45,"lon":54.385,"region":"Abu Dhabi Region"},{"name":"Mussafah","name_ar":"مصفح","type":"district","lat":24.347,"lon":54.498,"region":"Abu Dhabi Region"},{"name":"Khalifa City","name_ar":"مدينة خليفة","type":"district","lat":24.419,"lon":54.58,"region":"Abu Dhabi Region"},{"name":"Al Reem Island","name_ar":"جزيرة الريم","type":"district","lat":24.4985,"lon":54.4057,"region":"Abu Dhabi Region"},{"name":"Al Maryah Island","name_ar":"جزيرة المارية","type":"district","lat":24.5012,"lon":54.3892,"region":"Abu Dhabi Region"},{"name":"Saadiyat Island","name_ar":"جزيرة السعديات","type":"district","lat":24.544,"lon":54.433,"region":"Abu Dhabi Region"},{"name":"Yas Island","name_ar":"جزيرة ياس","type":"district","lat":24.4672,"lon":54.6037,"region":"Abu Dhabi Region"},{"name":"Sheikh Zayed Grand Mosque","name_ar":"جامع الشيخ زايد الكبير","type":"landmark","lat":24.4128,"lon":54.475,"region":"Abu Dhabi Region"},{"name":"Marina Mall","name_ar":"مارينا مول","type":"landmark","lat":24.476,"lon":54.32,"region":"Abu Dhabi Region"},{"name":"Yas Mall","name_ar":"ياس مول","type":"landmark","lat":24.4885,"lon":54.607,"region":"Abu Dhabi Region"},{"name":"Al Wahda Mall","name_ar":"الوحدة مول","type":"landmark","lat":24.472,"lon":54.372,"region":"Abu Dhabi Region"},{"name":"Sheikh Khalifa Medical City","name_ar":"مدينة الشيخ خليفة الطبية","type":"landmark","lat":24.464,"lon":54.364,"region":"Abu Dhabi Region"},{"name":"Cleveland Clinic Abu Dhabi","name_ar":"كليفلاند كلينك أبوظبي","type":"landmark","lat":24.5018,"lon":54.388,"region":"Abu Dhabi Region"},{"name":"Al Ain City Centre","name_ar":"وسط مدينة العين","type":"district","lat":24.2075,"lon":55.7447,"region":"Al Ain Region"},{"name":"Al Jimi","name_ar":"الجيمي","type":"district","lat":24.23,"lon":55.76,"region":"Al Ain Region"},{"name":"Jebel Hafeet Road","name_ar":"طريق جبل حفيت","type":"street","lat":24.06,"lon":55.77,"region":"Al Ain Region"},{"name":"Al Ain Oasis","name_ar":"واحة العين","type":"landmark","lat":24.223,"lon":55.777,"region":"Al Ain Region"},{"name":"Al Ain Zoo","name_ar":"حديقة حيوان العين","type":"landmark","lat":24.179,"lon":55.736,"region":"Al Ain Region"},{"name":"Madinat Zayed","name_ar":"مدينة زايد","type":"district","lat":23.654,"lon":53.705,"region":"Al Dhafra Region"},{"name":"Ruwais","name_ar":"الرويس","type":"district","lat":24.11,"lon":52.73,"region":"Al Dhafra Region"},{"name":"Ruwais Industrial Area","name_ar":"منطقة الرويس الصناعية","type":"landmark","lat":24.12,"lon":52.72,"region":"Al Dhafra Region"},{"name":"Liwa Oasis","name_ar":"واحة ليوا","type":"district","lat":23.13,"lon":53.79,"region":"Al Dhafra Region"},{"name":"Ghayathi","name_ar":"غياثي","type":"district","lat":23.842,"lon":52.8,"region":"Al Dhafra Region"},{"name":"Al Mirfa","name_ar":"المرفأ","type":"district","lat":24.09,"lon":53.45,"region":"Al Dhafra Region"}],"facilities":[{"id":"skmc_h","kind":"hospital","name":"Sheikh Khalifa Medical City","name_ar":"مدينة الشيخ خليفة الطبية","lat":24.464,"lon":54.364,"region":"Abu Dhabi Region"},{"id":"ccad_h","kind":"hospital","name":"Cleveland Clinic Abu Dhabi","name_ar":"كليفلاند كلينك أبوظبي","lat":24.5018,"lon":54.388,"region":"Abu Dhabi Region"},{"id":"mafraq_h","kind":"hospital","name":"Mafraq Hospital","name_ar":"مستشفى المفرق","lat":24.305,"lon":54.51,"region":"Abu Dhabi Region"},{"id":"corn_h","kind":"hospital","name":"Corniche Hospital","name_ar":"مستشفى الكورنيش","lat":24.483,"lon":54.351,"region":"Abu Dhabi Region"},{"id":"tawam_h","kind":"hospital","name":"Tawam Hospital","name_ar":"مستشفى توام","lat":24.259,"lon":55.702,"region":"Al Ain Region"},{"id":"alain_h","kind":"hospital","name":"Al Ain Hospital","name_ar":"مستشفى العين","lat":24.22,"lon":55.747,"region":"Al Ain Region"},{"id":"dhafra_h","kind":"hospital","name":"Madinat Zayed Hospital","name_ar":"مستشفى مدينة زايد","lat":23.66,"lon":53.7,"region":"Al Dhafra Region"},{"id":"ruwais_h","kind":"hospital","name":"Ruwais Hospital","name_ar":"مستشفى الرويس","lat":24.106,"lon":52.73,"region":"Al Dhafra Region"},{"id":"liwa_h","kind":"hospital","name":"Liwa Hospital","name_ar":"مستشفى ليوا","lat":23.131,"lon":53.787,"region":"Al Dhafra Region"},{"id":"adp_hq","kind":"police","name":"Abu Dhabi Police HQ","name_ar":"القيادة العامة لشرطة أبوظبي","lat":24.473,"lon":54.366,"region":"Abu Dhabi Region"},{"id":"muss_p","kind":"police","name":"Mussafah Police Station","name_ar":"مركز شرطة مصفح","lat":24.35,"lon":54.49,"region":"Abu Dhabi Region"},{"id":"yas_p","kind":"police","name":"Yas Island Police Station","name_ar":"مركز شرطة جزيرة ياس","lat":24.48,"lon":54.6,"region":"Abu Dhabi Region"},{"id":"alain_p","kind":"police","name":"Al Ain Police Station","name_ar":"مركز شرطة العين","lat":24.215,"lon":55.755,"region":"Al Ain Region"},{"id":"mzayed_p","kind":"police","name":"Madinat Zayed Police Station","name_ar":"مركز شرطة مدينة زايد","lat":23.66,"lon":53.71,"region":"Al Dhafra Region"},{"id":"ruwais_p","kind":"police","name":"Ruwais Police Station","name_ar":"مركز شرطة الرويس","lat":24.105,"lon":52.72,"region":"Al Dhafra Region"},{"id":"ad_cd","kind":"civil_defence","name":"Abu Dhabi Civil Defence Centre","name_ar":"مركز الدفاع المدني أبوظبي","lat":24.47,"lon":54.38,"region":"Abu Dhabi Region"},{"id":"muss_cd","kind":"civil_defence","name":"Mussafah Civil Defence Centre","name_ar":"مركز الدفاع المدني مصفح","lat":24.34,"lon":54.51,"region":"Abu Dhabi Region"},{"id":"alain_cd","kind":"civil_defence","name":"Al Ain Civil Defence Centre","name_ar":"مركز الدفاع المدني العين","lat":24.225,"lon":55.74,"region":"Al Ain Region"},{"id":"mzayed_cd","kind":"civil_defence","name":"Madinat Zayed Civil Defence Centre","name_ar":"مركز الدفاع المدني مدينة زايد","lat":23.65,"lon":53.7,"region":"Al Dhafra Region"},{"id":"ruwais_cd","kind":"civil_defence","name":"Ruwais Civil Defence Centre","name_ar":"مركز الدفاع المدني الرويس","lat":24.115,"lon":52.735,"region":"Al Dhafra Region"}],"regions":[{"id":"abudhabi","name":"Abu Dhabi Region","name_ar":"منطقة أبوظبي","lat":24.4539,"lon":54.3773,"zoom":11,"code":"ADR"},{"id":"alain","name":"Al Ain Region","name_ar":"منطقة العين","lat":24.2075,"lon":55.7447,"zoom":11,"code":"AAR"},{"id":"dhafra","name":"Al Dhafra Region","name_ar":"منطقة الظفرة","lat":23.654,"lon":53.705,"zoom":8,"code":"ADH"}]};
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const ico = (n, cls = "i") => `<svg class="${cls}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
+
+/* ---------- theme ---------- */
+$("#theme").onclick = () => {
+  const r = document.documentElement, dark = r.dataset.theme ? r.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  r.dataset.theme = dark ? "light" : "dark";
+};
+
+/* ---------- use-case content ---------- */
+const CATS = { medical: ["Medical", "pulse", "--medical"], fire: ["Fire & hazard", "flame", "--fire"], traffic: ["Traffic", "car", "--traffic"], crime: ["Crime", "alert", "--crime"],
+  language: ["Language & audio", "translate", "--language"], location: ["Location & regions", "pin", "--location"], assist: ["Call-taker assist", "headset", "--assist"],
+  governance: ["Governance", "shield", "--governance"], supervisor: ["Supervisor", "monitor", "--supervisor"], roadmap: ["Roadmap", "clock", "--roadmap"] };
+const UC = [
+ { id: "cardiac", cat: "medical", icon: "pulse", title: "Cardiac arrest at home", who: "Call-taker", sc: "en_cardiac", ph: "MVP",
+   sit: "A son reports his father collapsed and is not breathing. The caller is panicking and gives the address in pieces.",
+   does: ["Raises “Not breathing” and “Unconscious” alerts within the first sentence", "Matches “Hamdan Street, building 14, second floor” and confirms with handset location", "Scores P1 and lists exactly which cues added points", "Shows the centre's configured cardiac-arrest instruction for the call-taker to read"],
+   human: "The call-taker confirms the address, reads the instruction and accepts the fields. The AI never dispatches." },
+ { id: "fire-gulf", cat: "fire", icon: "flame", title: "Building fire, Gulf Arabic with English words", who: "Call-taker", sc: "ar_gulf_fire", ph: "MVP",
+   sit: "A caller mixes Gulf Arabic with English (“فيه حريق في building”) while smoke fills the stairwell and children are upstairs.",
+   does: ["Detects Arabic with Gulf dialect markers and flags code-switching", "Raises fire-spreading, trapped-persons and child alerts", "Reads “الدور الخامس” as floor 5 and “خمسة اشخاص” as five people", "Resolves the street name to the gazetteer despite spelling variants"],
+   human: "The call-taker verifies the floor and head-count with the caller before accepting." },
+ { id: "collision", cat: "traffic", icon: "car", title: "Road collision, Levantine Arabic", who: "Call-taker", sc: "ar_levant_traffic", ph: "MVP",
+   sit: "Two cars collide on a major road. One person is bleeding and a six-year-old is not responding. The handset has no usable location.",
+   does: ["Classifies as road traffic collision with agencies Traffic Police and Ambulance", "Reads Arabic-Indic digits (٦ سنوات) and raises a child alert", "Locates from the spoken road name alone, with confidence shown", "Adds the nearest hospital to the case because medical cues are present"],
+   human: "Because there is no handset position, the location stays a suggestion until the call-taker confirms it." },
+ { id: "knife", cat: "crime", icon: "alert", title: "Knife attack on a noisy line, Egyptian Arabic", who: "Call-taker", sc: "ar_egypt_assault", ph: "MVP",
+   sit: "A frightened caller whispers over street noise that a man with a knife is attacking people.",
+   does: ["Flags the poor audio and lowers field confidence instead of trusting it", "Raises weapon and bleeding alerts and classifies as crime in progress", "Understands negation: “no weapon” does not trigger the weapon alert", "Suggests the safety instruction for the caller and the next question about the suspect"],
+   human: "Low-confidence fields are marked “verify”; the call-taker reads them back to the caller." },
+ { id: "rollover", cat: "traffic", icon: "truck", title: "Rollover on Jebel Hafeet Road (Al Ain)", who: "Call-taker", sc: "ar_alain_traffic", ph: "MVP",
+   sit: "A car overturns on the mountain road outside the city. People are trapped and a child is hurt.",
+   does: ["Maps the road to Al Ain Region and the Jebel Hafeet area", "Raises trapped, bleeding and child alerts", "Lists Al Ain Police Station and Al Ain Hospital as nearest facilities with straight-line distance", "Creates the case number and a timeline of every AI and human step"],
+   human: "Distances are straight-line only; routing and ETA are Phase 2." },
+ { id: "gas", cat: "fire", icon: "flask", title: "Gas leak and fire at Ruwais industrial area", who: "Call-taker", sc: "en_dhafra_gas", ph: "MVP",
+   sit: "An industrial worker reports a gas leak that has ignited. Two colleagues are trapped inside the plant.",
+   does: ["Raises gas hazard, fire-spreading and trapped alerts", "Prefers the specific “Ruwais Industrial Area” over the town of Ruwais", "Assigns Al Dhafra Region and the nearest civil defence centre", "Scores P1 with each reason visible"],
+   human: "Hazard information is passed to responders by the call-taker, not automatically." },
+ { id: "geo", cat: "location", icon: "pin", title: "Location from speech and handset", who: "Call-taker", sc: "en_cardiac", ph: "MVP",
+   sit: "Callers say “near the cornish” or “Shaikh Zaid road”. Spelling and transliteration vary and some places are only landmarks.",
+   does: ["Fuzzy and phonetic matching against the gazetteer in Arabic and Latin script", "Fuses with handset position: agreement raises confidence, conflicts are flagged with the distance", "Always shows ranked alternatives and a map pin"],
+   human: "Never a single silent guess: the call-taker sees the confidence and the alternatives." },
+ { id: "region", cat: "location", icon: "globe", title: "Case record and regional coverage", who: "Call-taker, supervisor", sc: "ar_alain_traffic", ph: "MVP",
+   sit: "Supervisors and responders need to know which region, area and facilities a case belongs to.",
+   does: ["Region in English and Arabic, area, coordinates, building and floor", "Agencies with hotlines and the nearest facility of each type", "Data-quality flags such as handset-only position or unacknowledged cues"],
+   human: "Region and location are suggestions until accepted." },
+ { id: "cues", cat: "assist", icon: "siren", title: "Critical-cue alerts", who: "Call-taker", sc: "en_cardiac", ph: "MVP",
+   sit: "In a long, chaotic call the single most important phrase is easy to miss.",
+   does: ["Broad English and Arabic patterns tuned for recall over precision", "Highlights the exact words in the transcript", "Stays on screen, pulsing, until acknowledged"],
+   human: "A missed cue is the worst error, so cue patterns err on the side of raising an alert." },
+ { id: "sop", cat: "assist", icon: "list", title: "Protocol guidance and self-ticking checklist", who: "Call-taker", sc: "ar_gulf_fire", ph: "MVP",
+   sit: "Each incident type has its own questions. Callers answer out of order.",
+   does: ["Deterministic rules pick the next unanswered question, in the caller's language", "Ticks items as the answers arrive, even when volunteered early", "Shows pre-arrival instructions when a cue calls for them"],
+   human: "Protocol text is configured by the centre and signed off by its safety board, not generated by AI." },
+ { id: "cad", cat: "assist", icon: "db", title: "Pre-filled CAD record", who: "Call-taker", sc: "en_cardiac", ph: "MVP",
+   sit: "Typing the same facts into CAD while listening delays dispatch.",
+   does: ["Fields appear with confidence bars and the evidence they came from", "Accept, edit or reject each one; accepted and edited values are written to CAD", "Later AI changes never overwrite what the call-taker confirmed"],
+   human: "Nothing is written to CAD without an explicit human action." },
+ { id: "dialect", cat: "language", icon: "translate", title: "Dialects and code-switching", who: "Call-taker", sc: "ar_gulf_fire", ph: "MVP",
+   sit: "Callers speak Gulf, Levantine, Egyptian or Maghrebi Arabic and switch to English mid-sentence.",
+   does: ["Labels the dialect family and shows when a call is code-switched", "Normalises spelling variants, diacritics and Arabic-Indic digits before matching", "Carries the language through to the next-question prompt"],
+   human: "Dialect detection here is a heuristic baseline; real accuracy must be measured on real audio." },
+ { id: "audio", cat: "language", icon: "wifioff", title: "Noisy and low-quality audio", who: "Call-taker", sc: "ar_egypt_assault", ph: "MVP",
+   sit: "Sirens, wind and panic degrade the transcript.",
+   does: ["Marks low-quality segments with a dashed outline", "Lowers the confidence of every field derived from them", "Tells the call-taker which values to read back"],
+   human: "Uncertainty is shown, never hidden." },
+ { id: "shadow", cat: "governance", icon: "eye", title: "Shadow-mode rollout", who: "Safety board", sc: null, ph: "MVP",
+   sit: "Before call-takers see any AI output, the centre needs evidence it is safe.",
+   does: ["AI runs and logs everything but shows nothing and writes nothing to CAD", "Scores AI against what call-takers actually entered: incident, location and cue recall", "Reports whether the written gate thresholds are met"],
+   human: "The safety board, not the vendor, decides when to move to assist mode." },
+ { id: "kill", cat: "governance", icon: "power", title: "Kill switches and degraded modes", who: "Shift supervisor", sc: null, ph: "MVP",
+   sit: "A feature misbehaves mid-shift.",
+   does: ["Disable extraction, location, cues, severity, SOP or CAD writes individually", "The transcript keeps flowing and the call-taker works exactly as before", "Every toggle is itself audited"],
+   human: "Owned by the shift supervisor, effective immediately." },
+ { id: "audit", cat: "governance", icon: "file", title: "Tamper-evident audit trail", who: "Auditor", sc: null, ph: "MVP",
+   sit: "After an incident, reviewers must reconstruct who saw and decided what.",
+   does: ["Every transcript line, suggestion, cue, accept, edit and CAD write is recorded", "Records are HMAC-chained; any edit, deletion or reordering fails verification", "Corrections are archived for the learning loop"],
+   human: "Verification is one API call or one click on the admin page." },
+ { id: "wall", cat: "supervisor", icon: "monitor", title: "Supervisor wall", who: "Shift supervisor", sc: null, ph: "MVP",
+   sit: "A supervisor oversees many simultaneous calls.",
+   does: ["Active calls sorted by priority with case number, region, incident and alerts", "Flags calls that have gone silent", "Live updates over WebSocket"],
+   human: "Overview only; it does not reassign calls on its own." },
+ { id: "units", cat: "roadmap", icon: "truck", title: "Unit recommendation and routing", who: "Dispatcher", sc: null, ph: "P2",
+   sit: "Choose the right unit by type, distance, ETA and availability.", does: ["Rank units and agencies for the incident", "Multi-agency routing"], human: "Recommendation only; dispatcher assigns." },
+ { id: "cctv", cat: "roadmap", icon: "camera", title: "CCTV and sensor fusion", who: "Call-taker", sc: null, ph: "P2",
+   sit: "See what the cameras near the caller see.", does: ["Auto-open nearest cameras on the incident", "Later: ANPR and sensor correlation"], human: "Operator chooses what to view." },
+ { id: "mim", cat: "roadmap", icon: "users", title: "Major-incident mode", who: "Supervisor", sc: null, ph: "P2",
+   sit: "Hundreds of calls about one event.", does: ["Cluster duplicate calls", "Auto-summarise and triage the queue"], human: "Supervisor confirms the cluster." },
+ { id: "tts", cat: "roadmap", icon: "translate", title: "Live translation with synthetic voice", who: "Call-taker", sc: null, ph: "P2",
+   sit: "The caller speaks a language nobody on shift speaks.", does: ["Two-way translation", "Pre-arrival instructions read out in the caller's language"], human: "Call-taker approves the text." },
+ { id: "hoax", cat: "roadmap", icon: "search", title: "Hoax and repeat-caller detection", who: "Supervisor", sc: null, ph: "P2",
+   sit: "Prank and abusive calls consume capacity.", does: ["Flag likely hoaxes with reasons", "Repeat-caller history"], human: "Flag only; never auto-reject a call." },
+ { id: "qa", cat: "roadmap", icon: "chart", title: "Automatic QA scoring", who: "QA lead", sc: null, ph: "P2",
+   sit: "Reviewing a handful of calls does not show systemic gaps.", does: ["Score every call against protocol", "Trend and hotspot analytics"], human: "QA lead reviews flagged calls." },
+ { id: "sim", cat: "roadmap", icon: "grad", title: "Training simulator", who: "Trainer", sc: null, ph: "P3",
+   sit: "New call-takers need realistic practice.", does: ["AI role-play callers in all dialects", "Scored practice sessions"], human: "Trainer designs the scenarios." },
+ { id: "ecall", cat: "roadmap", icon: "hospital", title: "eCall, text and sign-language channels", who: "Call-taker", sc: null, ph: "P3",
+   sit: "Not every emergency is a voice call.", does: ["Vehicle crash data ingestion", "Text and sign-language relay with the same extraction"], human: "Same human-in-the-loop rules." },
+];
+document.getElementById("statUC").textContent = UC.length;
+
+/* ---------- filters + cards ---------- */
+let cat = "all";
+function banner(c) {
+  const [, , v] = CATS[c.cat], col = `var(${v})`;
+  return `<div class="banner" style="background:linear-gradient(135deg,${col},color-mix(in srgb,${col} 55%,#0b1220))">
+    <svg class="deco" viewBox="0 0 300 118" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><circle cx="250" cy="20" r="64" fill="none" stroke="#fff" stroke-width="2"/><circle cx="250" cy="20" r="38" fill="none" stroke="#fff" stroke-width="2"/><path d="M0 96c40-20 70 12 110-6s70-22 110-4 60 8 80-2" fill="none" stroke="#fff" stroke-width="3"/><circle cx="40" cy="30" r="3" fill="#fff"/><circle cx="70" cy="50" r="2" fill="#fff"/><circle cx="26" cy="64" r="2" fill="#fff"/></svg>
+    <span class="tag ${c.ph === "MVP" ? "" : "road"}">${c.ph === "MVP" ? "BUILT · MVP" : "ROADMAP · " + c.ph}</span>${ico(c.icon, "i big")}</div>`;
+}
+function renderFilters() {
+  const counts = { all: UC.length }; UC.forEach((u) => (counts[u.cat] = (counts[u.cat] || 0) + 1));
+  $("#filters").innerHTML = [["all", "All", "list"], ...Object.entries(CATS).map(([k, v]) => [k, v[0], v[1]])]
+    .map(([k, l, i]) => `<button class="chip" data-c="${k}" aria-pressed="${k === cat}">${ico(i)} ${l} <small>${counts[k] || 0}</small></button>`).join("");
+  $("#filters").querySelectorAll(".chip").forEach((b) => (b.onclick = () => { cat = b.dataset.c; renderFilters(); renderCards(); }));
+}
+function renderCards() {
+  const list = UC.filter((u) => cat === "all" || u.cat === cat);
+  $("#grid").innerHTML = list.map((u) => `<button class="card ${u.cat === "roadmap" ? "roadmap" : ""}" data-id="${u.id}" aria-label="Open use case: ${esc(u.title)}">${banner(u)}
+    <div class="body"><h3>${esc(u.title)}</h3><p>${esc(u.sit)}</p><span class="more">${u.ph === "MVP" ? "See how it works" : "See the plan"} ${ico("arrow")}</span></div></button>`).join("");
+  $("#empty").style.display = list.length ? "none" : "block";
+  $("#grid").querySelectorAll(".card").forEach((b) => (b.onclick = () => openUC(b.dataset.id)));
+}
+
+/* ---------- modal ---------- */
+function openUC(id) {
+  const u = UC.find((x) => x.id === id), [label, , v] = CATS[u.cat];
+  $("#dHead").style.background = `linear-gradient(135deg,var(${v}),color-mix(in srgb,var(${v}) 55%,#0b1220))`;
+  $("#dIcon").innerHTML = `<use href="#i-${u.icon}"/>`; $("#dTitle").textContent = u.title;
+  $("#dMeta").textContent = `${label} · ${u.who} · ${u.ph === "MVP" ? "Built in the MVP" : "Roadmap " + u.ph + ", not built yet"}`;
+  $("#dBody").innerHTML = `<div><h4>Situation</h4><p style="margin:0">${esc(u.sit)}</p></div>
+    <div><h4>${u.ph === "MVP" ? "What the Co-Pilot does" : "Planned capability"}</h4><ul>${u.does.map((d) => `<li>${esc(d)}</li>`).join("")}</ul></div>
+    <div class="callout ${u.ph === "MVP" ? "" : "warn"}"><b>Human control.</b> ${esc(u.human)}</div>
+    ${u.sc ? `<div><button class="btn primary" id="dDemo">${ico("play")} Replay this call</button></div>` : ""}`;
+  if (u.sc) $("#dDemo").onclick = () => { $("#dlg").close(); loadScenario(u.sc); $("#demo").scrollIntoView(); start(); };
+  $("#dlg").showModal();
+}
+$("#dClose").onclick = () => $("#dlg").close();
+$("#dlg").addEventListener("click", (e) => { if (e.target === $("#dlg")) $("#dlg").close(); });
+
+/* ---------- demo player (frames come from the real pipeline) ---------- */
+let sc = null, idx = 0, timer = null;
+const SC_IDS = Object.keys(D.scenarios);
+$("#scSel").innerHTML = SC_IDS.map((k) => `<option value="${k}">${esc(D.scenarios[k].title)}</option>`).join("");
+$("#scSel").onchange = (e) => loadScenario(e.target.value);
+function loadScenario(id) { stop(); sc = D.scenarios[id]; $("#scSel").value = id; idx = 0; draw(); }
+function hl(text, evid) {
+  const r = []; evid.filter(Boolean).forEach((e) => { const i = text.indexOf(e); if (i >= 0) r.push([i, i + e.length]); });
+  r.sort((a, b) => a[0] - b[0]); let o = "", p = 0;
+  r.forEach(([s, e]) => { if (s >= p) { o += esc(text.slice(p, s)) + "<mark>" + esc(text.slice(s, e)) + "</mark>"; p = e; } });
+  return o + esc(text.slice(p));
+}
+function draw() {
+  const shown = sc.frames.slice(0, idx), last = shown[shown.length - 1];
+  const allEv = last ? last.cues.map((c) => c.evidence) : [];
+  $("#tr").innerHTML = shown.map((f) => `<div class="msg ${f.speaker} ${f.lowq ? "lowq" : ""}" dir="auto"><small>${f.speaker}${f.lowq ? " · low audio quality, verify" : ""}</small>${hl(f.text, f.speaker === "calltaker" ? [] : allEv)}</div>`).join("");
+  $("#tr").scrollTop = 1e6;
+  $("#lang").textContent = last && last.lang !== "unknown" ? "· " + last.lang : "";
+  $("#cues").innerHTML = last ? last.cues.map((c) => `<span class="cue ${c.level}">${ico("alert")} ${esc(c.label)}</span>`).join("") : "";
+  const p = last ? last.priority : null;
+  $("#badge").textContent = p && last.fields.priority ? p.level : "–"; $("#badge").className = "badge " + (p && last.fields.priority ? p.level : "");
+  $("#reasons").textContent = p && last.fields.priority ? `Score ${p.score}: ` + p.reasons.join(" · ") : "Waiting for the first caller line…";
+  const order = ["incident_type", "priority", "region", "location", "address_detail", "persons", "ages", "injuries", "hazards"];
+  $("#fields").innerHTML = last ? order.filter((k) => last.fields[k]).map((k) => { const f = last.fields[k];
+    return `<div class="f"><span>${esc(f.label)}</span><div><b dir="auto">${esc(f.value)}</b><div class="bar"><i style="width:${Math.round(f.conf * 100)}%"></i></div></div><span>${Math.round(f.conf * 100)}%</span></div>`; }).join("") : "";
+  const nq = $("#nq"); nq.hidden = !(last && last.next);
+  if (last && last.next) nq.innerHTML = `<div class="kicker" style="font-size:11px">Next question</div><div dir="auto"><b>${esc(last.next.en)}</b></div><div dir="rtl" style="color:var(--muted)">${esc(last.next.ar)}</div>`;
+  const c = last && last.case;
+  $("#casemini").innerHTML = c && c.region ? `<b>${esc(c.number)}</b> · ${esc(c.region)}${c.area ? " · " + esc(c.area) : ""}<br>${c.agencies.map((a) => esc(a.name) + " " + esc(a.hotline || "")).join(" · ")}${c.facilities.length ? "<br>Nearest: " + c.facilities.map((f) => `${esc(f.name)} (${f.km} km)`).join("; ") : ""}` : (c ? `<b>${esc(c.number)}</b> · region pending` : "");
+  const done = idx >= sc.frames.length; $("#play span").textContent = timer ? "Pause" : done ? "Replay" : "Play";
+  $("#play svg use").setAttribute("href", timer ? "#i-pause" : "#i-play"); $("#next").disabled = done;
+}
+function step() { if (idx < sc.frames.length) { idx++; draw(); } if (idx >= sc.frames.length) stop(); }
+function start() { if (idx >= sc.frames.length) idx = 0; stop(); step(); if (idx < sc.frames.length) { timer = setInterval(step, 1700); draw(); } }
+function stop() { clearInterval(timer); timer = null; if (sc) draw(); }
+$("#play").onclick = () => (timer ? stop() : start());
+$("#next").onclick = () => { stop(); step(); };
+$("#reset").onclick = () => { stop(); idx = 0; draw(); };
+
+/* ---------- Abu Dhabi schematic map ---------- */
+(function map() {
+  const W = 860, H = 500, X = (lon) => ((lon - 51.4) / 4.7) * W, Y = (lat) => ((25.1 - lat) / 2.55) * H;
+  const poly = (pts) => pts.map(([lo, la], i) => (i ? "L" : "M") + X(lo).toFixed(1) + " " + Y(la).toFixed(1)).join(" ") + "Z";
+  const Z = {
+    dhafra: [[51.6, 24.2], [52.7, 24.2], [53.45, 24.17], [53.95, 24.25], [53.95, 23.95], [55.3, 23.95], [55.3, 23.0], [55.8, 23.0], [55.2, 22.7], [52.0, 22.7]],
+    abudhabi: [[53.95, 24.25], [54.4, 24.55], [54.7, 24.5], [54.95, 24.85], [55.3, 24.75], [55.3, 23.95], [53.95, 23.95]],
+    alain: [[55.3, 24.75], [55.6, 24.5], [55.95, 24.25], [55.6, 23.9], [55.8, 23.0], [55.3, 23.0]],
+  };
+  const COL = { dhafra: "#f97316", abudhabi: "#3b82f6", alain: "#16a34a" }, NAME = { dhafra: "Al Dhafra Region", abudhabi: "Abu Dhabi Region", alain: "Al Ain Region" };
+  const LBL = { dhafra: [52.7, 23.35], abudhabi: [54.45, 24.15], alain: [55.58, 23.45] };
+  let s = `<rect width="860" height="500" rx="14" fill="var(--surface2)"/><g opacity=".5" stroke="var(--line)"><path d="M0 125h860M0 250h860M0 375h860M215 0v500M430 0v500M645 0v500"/></g>`;
+  s += `<text x="20" y="40" font-size="13" font-weight="700" fill="var(--muted)">Arabian Gulf</text>`;
+  for (const k of Object.keys(Z)) s += `<path d="${poly(Z[k])}" fill="${COL[k]}" fill-opacity=".16" stroke="${COL[k]}" stroke-width="2.2" stroke-linejoin="round"/>`;
+  for (const k of Object.keys(LBL)) { const [a, ...b] = NAME[k].split(" Region"), x = X(LBL[k][0]), y = Y(LBL[k][1]);
+    s += `<text x="${x}" y="${y}" text-anchor="middle" font-size="15" font-weight="800" fill="${COL[k]}">${a}<tspan x="${x}" dy="17">Region</tspan></text>`; }
+  const FC = { hospital: "#22c55e", police: "#0ea5e9", civil_defence: "#eab308" };
+  D.places.forEach((p) => (s += `<circle cx="${X(p.lon)}" cy="${Y(p.lat)}" r="3" fill="var(--muted)" opacity=".7"><title>${esc(p.name)} · ${esc(p.name_ar)}</title></circle>`));
+  D.facilities.forEach((f) => (s += `<circle cx="${X(f.lon)}" cy="${Y(f.lat)}" r="5.5" fill="${FC[f.kind]}" stroke="#fff" stroke-width="1.4"><title>${esc(f.name)} (${f.kind.replace("_", " ")})</title></circle>`));
+  Object.values(D.scenarios).forEach((c) => { if (!c.aml) return; const a = c.aml;
+    s += `<circle class="pin" cx="${X(a.lon)}" cy="${Y(a.lat)}" r="13" fill="#ef4444" opacity=".35"/><circle cx="${X(a.lon)}" cy="${Y(a.lat)}" r="5" fill="#ef4444" stroke="#fff" stroke-width="1.6"><title>${esc(c.title)}</title></circle>`; });
+  s += `<g transform="translate(810 58)"><circle r="26" fill="var(--surface)" stroke="var(--line)"/><path d="M0 -18L6 4H-6Z" fill="var(--text)"/><text y="19" text-anchor="middle" font-size="11" font-weight="800" fill="var(--muted)">N</text></g>`;
+  s += `<text x="20" y="486" font-size="12" fill="var(--muted)">Schematic outline, not to scale. Demo coordinates.</text>`;
+  $("#map").innerHTML = s;
+})();
+
+renderFilters(); renderCards(); loadScenario(SC_IDS.includes("en_cardiac") ? "en_cardiac" : SC_IDS[0]);
+</script>
+</body>
+</html>
