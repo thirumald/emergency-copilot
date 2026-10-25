@@ -20,7 +20,7 @@
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:72px}
 body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Arabic",sans-serif}
 a{color:var(--brand)}svg.i{width:1.25em;height:1.25em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-.2em}
-.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.wrap{max-width:none;margin:0 auto;padding:0 clamp(16px,3.2vw,56px)}
 .sr{position:absolute;left:-9999px}.skip:focus{left:12px;top:12px;background:var(--brand);color:var(--brand-ink);padding:8px 12px;border-radius:8px;z-index:100}
 :focus-visible{outline:3px solid var(--brand);outline-offset:2px;border-radius:6px}
 /* nav */
@@ -49,7 +49,7 @@ h1 em{font-style:normal;background:linear-gradient(90deg,#ef4444,#f97316);-webki
 /* sections */
 section.block{padding:56px 0}section.alt{background:var(--surface);border-block:1px solid var(--line)}
 .kicker{color:var(--brand);font-weight:800;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
-h2{font-size:clamp(24px,3vw,34px);margin:6px 0 8px;letter-spacing:-.01em}.sub{color:var(--muted);max-width:70ch;margin:0 0 26px}
+h2{font-size:clamp(24px,3vw,34px);margin:6px 0 8px;letter-spacing:-.01em}.sub{color:var(--muted);max-width:100ch;margin:0 0 26px}
 /* pipeline */
 .pipe{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;counter-reset:s}
 .step{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;position:relative}
@@ -61,7 +61,7 @@ h2{font-size:clamp(24px,3vw,34px);margin:6px 0 8px;letter-spacing:-.01em}.sub{co
 .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
 .chip{border:1px solid var(--line);background:var(--surface);color:var(--text);padding:7px 14px;border-radius:99px;font-weight:700;font-size:14px;cursor:pointer;display:inline-flex;gap:7px;align-items:center}
 .chip[aria-pressed="true"]{background:var(--text);color:var(--bg);border-color:var(--text)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;transition:transform .15s,box-shadow .15s;text-align:left;padding:0;font:inherit;color:inherit;cursor:pointer}
 .card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
 .banner{height:118px;position:relative;display:grid;place-items:center;color:#fff;overflow:hidden}
@@ -125,8 +125,9 @@ th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}th{b
 .tablewrap{overflow:auto;border-radius:16px}
 .gmap{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:12px;margin-bottom:8px}
 .gbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px}.gbar select{flex:1;min-width:220px}
-#gFrame{width:100%;height:460px;border:0;border-radius:14px;background:var(--surface2);display:block}
+#gFrame{width:100%;height:clamp(420px,66vh,820px);border:0;border-radius:14px;background:var(--surface2);display:block}
 @media(max-width:700px){#gFrame{height:340px}}
+.gmap:fullscreen{display:flex;flex-direction:column;border-radius:0;padding:12px;background:var(--surface)}.gmap:fullscreen #gFrame{flex:1;height:auto}.gmap:fullscreen .note{display:none}
 .audgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
 .aud{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px}
 .aud header{display:flex;align-items:center;gap:10px}.aud header .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:#fff;background:var(--language)}
@@ -191,6 +192,7 @@ footer .by .av{width:34px;height:34px;border-radius:50%;background:linear-gradie
 <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></symbol>
 <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
 <symbol id="i-wifioff" viewBox="0 0 24 24"><path d="M2 8.8a15 15 0 0 1 4-2.3M22 8.8a15 15 0 0 0-8.5-3.7M5 12.5a10 10 0 0 1 3-1.8M19 12.5a10 10 0 0 0-3.2-2M9 16a5 5 0 0 1 6 0M12 20h.01M3 3l18 18"/></symbol>
+<symbol id="i-expand" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
 <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
 </defs>
 </svg>
@@ -302,7 +304,8 @@ footer .by .av{width:34px;height:34px;border-radius:50%;background:linear-gradie
   <div class="gmap">
     <div class="gbar"><label for="gSel" class="sr">Show on map</label>
       <select id="gSel" aria-label="Show on Google map"></select>
-      <a class="btn" id="gOpen" target="_blank" rel="noopener"><svg class="i" aria-hidden="true"><use href="#i-pin"/></svg> Open in Google Maps</a></div>
+      <a class="btn" id="gOpen" target="_blank" rel="noopener"><svg class="i" aria-hidden="true"><use href="#i-pin"/></svg> Open in Google Maps</a>
+      <button class="btn" id="gFull" type="button"><svg class="i" aria-hidden="true"><use href="#i-expand"/></svg> <span>Full screen</span></button></div>
     <iframe id="gFrame" title="Google map of Abu Dhabi" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
     <p class="note" style="margin:8px 4px 0">Real Google map embed (needs an internet connection; loading it shares your IP address with Google). Pick a region, demo case or facility to jump to it. For an on-premise centre the call-taker panel uses a map server you control instead.</p>
   </div>
@@ -573,6 +576,9 @@ $("#audGrid").innerHTML = D.audio.map((a) => {
     $("#gOpen").href = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
   }
   $("#gSel").onchange = (e) => show(+e.target.value);
+  const box = document.querySelector(".gmap");
+  $("#gFull").onclick = () => (document.fullscreenElement ? document.exitFullscreen() : box.requestFullscreen && box.requestFullscreen());
+  document.addEventListener("fullscreenchange", () => ($("#gFull span").textContent = document.fullscreenElement ? "Exit full screen" : "Full screen"));
   show(0);
 })();
 
