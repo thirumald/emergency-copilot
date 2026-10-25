@@ -105,12 +105,21 @@ mark{background:#f59e0b55;color:inherit;border-radius:3px;padding:0 2px}
       <section class="card" style="flex:2"><h2>Units <span class="sp" id="unitFilter"></span></h2><div class="scroll" id="units"></div></section>
     </div>
     <section class="card" id="mapcard"><h2>Live map · Abu Dhabi emirate <span class="sp" id="regBtns"></span></h2>
-      <div class="mapbar" id="legend"></div><div id="map"></div></section>
+      <div class="mapbar" id="legend"></div><div class="hint" id="mapStatus"></div><div id="map"></div></section>
     <section class="card"><h2 id="detTitle">Selected incident</h2><div class="scroll" id="detail"><div class="empty">Select an incident in the queue or on the map.</div></div></section>
   </main>
   <section class="card" id="logcard"><h2>Event log <span class="sp" id="logFilter"></span></h2><div class="scroll log" id="log"></div></section>
 </div>
 
+<dialog id="mapDlg" style="background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:14px;max-width:520px;width:calc(100% - 28px);padding:18px">
+  <h3 style="margin:0 0 8px">Map settings</h3>
+  <label style="display:block;margin:8px 0 4px">Map provider</label>
+  <select id="mapProv" style="width:100%"><option value="osm">OpenStreetMap (CARTO dark): free, no key</option><option value="google">Google Maps JavaScript API: needs your API key</option></select>
+  <label style="display:block;margin:10px 0 4px" for="gKey">Google Maps API key</label>
+  <input id="gKey" type="password" autocomplete="off" placeholder="AIza…" style="width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px 10px">
+  <div class="hint" style="padding:8px 0 0">There is no keyless Google map API. To use Google: in Google Cloud Console create a project, <b>enable "Maps JavaScript API"</b>, create an API key, and <b>restrict it to this site's HTTP referrer</b> and to that one API. Google asks for a billing account but includes free monthly usage; check its current pricing. A key in a web page is visible to visitors, which is why the referrer restriction matters. The key is stored only in this browser and sent only to Google. If Google fails, the page falls back to OpenStreetMap.</div>
+  <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end"><button id="mapClear">Remove key</button><button id="mapClose">Cancel</button><button id="mapSave" class="on">Save and reload</button></div>
+</dialog>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 const D = /*__DATA__*/null;
@@ -228,40 +237,86 @@ function tick(dtReal) {
   S.units.forEach(unitMarker);
 }
 
-/* ---------- map ---------- */
-let MAP = null, incMk = {}, unitMk = {}, routeLn = {};
-function mapInit() {
-  const box = $("#map");
-  if (!window.L) { box.innerHTML = '<div class="empty">The live map needs an internet connection (Leaflet and map tiles). The simulation, queue, SOP and dispatch still run.</div>'; return; }
-  MAP = L.map("map", { zoomControl: true }).setView([24.46, 54.40], 10);
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png", { maxZoom: 19, subdomains: "abcd", attribution: "© OpenStreetMap contributors © CARTO" }).addTo(MAP);
-  D.regions.forEach((r) => L.circleMarker([r.lat, r.lon], { radius: 1, opacity: 0, fillOpacity: 0, interactive: false }).bindTooltip(r.name, { permanent: true, direction: "top", opacity: .8 }).addTo(MAP));
-  D.facilities.forEach((f) => L.marker([f.lat, f.lon], { icon: L.divIcon({ className: "", html: '<div class="fmk"></div>', iconSize: [10, 10] }) }).bindTooltip(`${f.name}`).addTo(MAP));
-  $("#regBtns").innerHTML = D.regions.map((r, i) => `<button data-r="${i}">${esc(r.name.replace(" Region", ""))}</button>`).join("") + '<button id="fitAll">Fit all</button>';
-  document.querySelectorAll("#regBtns [data-r]").forEach((b) => (b.onclick = () => MAP.setView([D.regions[+b.dataset.r].lat, D.regions[+b.dataset.r].lon], +b.dataset.r === 2 ? 8 : 11)));
-  $("#fitAll").onclick = () => MAP.fitBounds([[22.9, 51.8], [25.0, 56.0]]);
+/* ---------- map: adapter over Leaflet/OSM (default, free, no key) or the Google Maps JavaScript API (operator supplies a key) ---------- */
+let MAP = null, incMk = {}, unitMk = {}, routeLn = {}, MAP_NAME = "", MAP_NOTE = "";
+const MAPCFG = (() => { const q = new URLSearchParams(location.search), get = (k) => { try { return localStorage.getItem(k) || ""; } catch { return ""; } };
+  const key = (q.get("gmapsKey") || get("ccc_gkey")).trim(); return { key, prov: q.get("map") || get("ccc_map") || "osm" }; })();
+const CENTER = [24.46, 54.40], ALL_SW = [22.9, 51.8], ALL_NE = [25.0, 56.0];
+
+class LeafletMap {
+  constructor(el) { this.m = L.map(el, { zoomControl: true }).setView(CENTER, 10);
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png", { maxZoom: 19, subdomains: "abcd", attribution: "© OpenStreetMap contributors © CARTO" }).addTo(this.m); }
+  view(lat, lon, z) { this.m.setView([lat, lon], z); } pan(lat, lon) { this.m.panTo([lat, lon]); } fit(sw, ne) { this.m.fitBounds([sw, ne]); } resize() { this.m.invalidateSize(); }
+  label(lat, lon, text) { L.circleMarker([lat, lon], { radius: 1, opacity: 0, fillOpacity: 0, interactive: false }).bindTooltip(text, { permanent: true, direction: "top", opacity: .8 }).addTo(this.m); }
+  marker(lat, lon, html, size, o = {}) {
+    const icon = (h) => L.divIcon({ className: "", html: h, iconSize: size }), mk = L.marker([lat, lon], { icon: icon(html), zIndexOffset: o.z || 0 }).addTo(this.m), m = this.m;
+    if (o.tip) mk.bindTooltip(o.tip); if (o.click) mk.on("click", o.click);
+    return { pos: (a, b) => mk.setLatLng([a, b]), html: (h) => mk.setIcon(icon(h)), tip: (t) => { mk.unbindTooltip(); mk.bindTooltip(t); },
+      show: (v) => { const e = mk.getElement(); if (e) e.style.display = v ? "" : "none"; }, remove: () => m.removeLayer(mk) }; }
+  line(color) { let ln = null; const m = this.m;
+    return { set: (a, b) => { if (!ln) ln = L.polyline([a, b], { color, weight: 2, dashArray: "5 6", opacity: .8 }).addTo(m); else ln.setLatLngs([a, b]); }, remove: () => { if (ln) { m.removeLayer(ln); ln = null; } } }; }
 }
-function incIcon(inc) { const p = prio(inc) || "P4", t = (cur(inc) && cur(inc).type) || "UNKNOWN";
-  return L.divIcon({ className: "", iconSize: [26, 26], html: `<div class="imk ${p} ${inc.id === S.sel ? "sel" : ""} ${inc.state === "resolved" ? "res" : ""}">${ico(TYPE_ICON[t] || "siren")}</div>` }); }
+class GoogleMapAdapter {
+  constructor(el) { this.m = new google.maps.Map(el, { center: { lat: CENTER[0], lng: CENTER[1] }, zoom: 10, mapId: "DEMO_MAP_ID", colorScheme: google.maps.ColorScheme.DARK, gestureHandling: "greedy" }); }
+  view(lat, lon, z) { this.m.setCenter({ lat, lng: lon }); this.m.setZoom(z); } pan(lat, lon) { this.m.panTo({ lat, lng: lon }); }
+  fit(sw, ne) { this.m.fitBounds({ south: sw[0], west: sw[1], north: ne[0], east: ne[1] }); } resize() { google.maps.event.trigger(this.m, "resize"); }
+  _el(html) { const d = document.createElement("div"); d.style.transform = "translateY(50%)"; d.innerHTML = html; return d; }  // AdvancedMarker anchors bottom-centre; our icons are centre-anchored
+  label(lat, lon, text) { const el = document.createElement("div"); el.textContent = text; el.style.cssText = "color:#cbd5e1;font:700 12px system-ui;text-shadow:0 1px 3px #000;pointer-events:none"; new google.maps.marker.AdvancedMarkerElement({ map: this.m, position: { lat, lng: lon }, content: el }); }
+  marker(lat, lon, html, size, o = {}) {
+    const el = this._el(html), mk = new google.maps.marker.AdvancedMarkerElement({ map: this.m, position: { lat, lng: lon }, content: el, zIndex: o.z || 0, title: o.tip || "" }), m = this.m;
+    if (o.click) mk.addListener("click", o.click);
+    return { pos: (a, b) => { mk.position = { lat: a, lng: b }; }, html: (h) => { el.innerHTML = h; }, tip: (t) => { mk.title = t; }, show: (v) => { mk.map = v ? m : null; }, remove: () => { mk.map = null; } }; }
+  line(color) { let ln = null; const m = this.m;
+    return { set: (a, b) => { const path = [{ lat: a[0], lng: a[1] }, { lat: b[0], lng: b[1] }]; if (!ln) ln = new google.maps.Polyline({ map: m, path, strokeColor: color, strokeOpacity: .8, strokeWeight: 2 }); else ln.setPath(path); }, remove: () => { if (ln) { ln.setMap(null); ln = null; } } }; }
+}
+function loadGoogle(key) {
+  return new Promise((res, rej) => { let done = false; const fail = (m) => { if (!done) { done = true; rej(new Error(m)); } else { MAP_NOTE = m; renderMapStatus(); } };
+    window.__gmReady = () => { done = true; res(); }; window.gm_authFailure = () => fail("Google rejected the API key (check the key, enabled API, referrer restriction and billing)");
+    const s = document.createElement("script"); s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&v=weekly&loading=async&libraries=marker&callback=__gmReady`;
+    s.async = true; s.onerror = () => fail("could not load Google Maps (offline or blocked)"); document.head.appendChild(s); setTimeout(() => fail("Google Maps timed out"), 10000); });
+}
+async function mapInit() {
+  const box = $("#map");
+  if (MAPCFG.prov === "google" && MAPCFG.key) {
+    try { await loadGoogle(MAPCFG.key); MAP = new GoogleMapAdapter(box); MAP_NAME = "Google Maps"; }
+    catch (e) { MAP_NOTE = `${e.message}. Showing OpenStreetMap instead.`; }
+  } else if (MAPCFG.prov === "google") MAP_NOTE = "Google Maps needs an API key (Map settings). Showing OpenStreetMap instead.";
+  if (!MAP && window.L) { MAP = new LeafletMap(box); MAP_NAME = "OpenStreetMap (CARTO dark)"; }
+  renderMapStatus();
+  if (!MAP) { box.innerHTML = '<div class="empty">The live map needs an internet connection. The simulation, queue, SOP and dispatch still run.</div>'; return; }
+  D.regions.forEach((r) => MAP.label(r.lat, r.lon, r.name));
+  D.facilities.forEach((f) => MAP.marker(f.lat, f.lon, '<div class="fmk"></div>', [10, 10], { tip: f.name }));
+  $("#regBtns").innerHTML = D.regions.map((r, i) => `<button data-r="${i}">${esc(r.name.replace(" Region", ""))}</button>`).join("") + '<button id="fitAll">Fit all</button>';
+  document.querySelectorAll("#regBtns [data-r]").forEach((b) => (b.onclick = () => MAP.view(D.regions[+b.dataset.r].lat, D.regions[+b.dataset.r].lon, +b.dataset.r === 2 ? 8 : 11)));
+  $("#fitAll").onclick = () => MAP.fit(ALL_SW, ALL_NE);
+  if (S) { mapSync(); S.units.forEach(unitMarker); }
+}
+function renderMapStatus() { const e = $("#mapStatus"); if (e) e.innerHTML = `${esc(MAP_NAME || "no map")}${MAP_NOTE ? ` · <span style="color:var(--warn)">${esc(MAP_NOTE)}</span>` : ""} · <a href="#" id="mapCfgOpen" style="color:var(--brand)">Map settings</a>`;
+  const o = $("#mapCfgOpen"); if (o) o.onclick = (ev) => { ev.preventDefault(); openMapCfg(); }; }
+function openMapCfg() {
+  const d = $("#mapDlg"); $("#gKey").value = MAPCFG.key; $("#mapProv").value = MAPCFG.prov; d.showModal();
+  $("#mapSave").onclick = () => { try { localStorage.setItem("ccc_map", $("#mapProv").value); localStorage.setItem("ccc_gkey", $("#gKey").value.trim()); } catch {} const u = new URL(location.href); u.search = ""; location.href = u.toString(); };
+  $("#mapClear").onclick = () => { try { localStorage.removeItem("ccc_gkey"); localStorage.setItem("ccc_map", "osm"); } catch {} const u = new URL(location.href); u.search = ""; location.href = u.toString(); };
+  $("#mapClose").onclick = () => d.close();
+}
+const incHtml = (inc) => { const p = prio(inc) || "P4", t = (cur(inc) && cur(inc).type) || "UNKNOWN"; return `<div class="imk ${p} ${inc.id === S.sel ? "sel" : ""} ${inc.state === "resolved" ? "res" : ""}">${ico(TYPE_ICON[t] || "siren")}</div>`; };
 function mapSync() {
   if (!MAP) return;
-  S.incs.forEach((inc) => { if (!incMk[inc.id]) { incMk[inc.id] = L.marker([inc.lat, inc.lon], { icon: incIcon(inc), zIndexOffset: 500 }).addTo(MAP).on("click", () => select(inc.id)); }
-    incMk[inc.id].setIcon(incIcon(inc)); incMk[inc.id].bindTooltip(`${inc.num}: ${prio(inc) || "…"} ${inc.state}`); });
-  Object.keys(incMk).forEach((id) => { if (!S.incs.find((i) => i.id === +id)) { MAP.removeLayer(incMk[id]); delete incMk[id]; } });
+  S.incs.forEach((inc) => { const tip = `${inc.num}: ${prio(inc) || "…"} ${inc.state}`;
+    if (!incMk[inc.id]) incMk[inc.id] = MAP.marker(inc.lat, inc.lon, incHtml(inc), [26, 26], { z: 500, tip, click: () => select(inc.id) }); else { incMk[inc.id].html(incHtml(inc)); incMk[inc.id].tip(tip); } });
+  Object.keys(incMk).forEach((id) => { if (!S.incs.find((i) => i.id === +id)) { incMk[id].remove(); delete incMk[id]; } });
 }
 function unitMarker(u) {
   if (!MAP) return; const m = UM[u.type];
-  if (!unitMk[u.id]) unitMk[u.id] = L.marker(u.pos, { icon: L.divIcon({ className: "", iconSize: [24, 24], html: `<div class="umk" style="background:${m.hex}">${ico(m.icon)}</div>` }), zIndexOffset: 300 }).addTo(MAP).bindTooltip(u.id);
-  unitMk[u.id].setLatLng(u.pos);
-  const moving = u.status === "enroute" || u.status === "returning";
-  if (moving) { const tgt = u.status === "enroute" ? u.target : [u.home.lat, u.home.lon];
-    if (!routeLn[u.id]) routeLn[u.id] = L.polyline([u.pos, tgt], { color: m.hex, weight: 2, dashArray: "5 6", opacity: .8 }).addTo(MAP); else routeLn[u.id].setLatLngs([u.pos, tgt]); }
-  else if (routeLn[u.id]) { MAP.removeLayer(routeLn[u.id]); delete routeLn[u.id]; }
-  const el = unitMk[u.id].getElement(); if (el) el.style.display = (u.status === "available" && !S.showIdle) ? "none" : "";
+  if (!unitMk[u.id]) unitMk[u.id] = MAP.marker(u.pos[0], u.pos[1], `<div class="umk" style="background:${m.hex}">${ico(m.icon)}</div>`, [24, 24], { z: 300, tip: u.id });
+  if (!u._lp || u._lp[0] !== u.pos[0] || u._lp[1] !== u.pos[1]) { unitMk[u.id].pos(u.pos[0], u.pos[1]); u._lp = u.pos.slice(); }
+  if (u.status === "enroute" || u.status === "returning") { const tgt = u.status === "enroute" ? u.target : [u.home.lat, u.home.lon]; (routeLn[u.id] = routeLn[u.id] || MAP.line(m.hex)).set(u.pos, tgt); }
+  else if (routeLn[u.id]) { routeLn[u.id].remove(); delete routeLn[u.id]; }
+  unitMk[u.id].show(!(u.status === "available" && !S.showIdle));
 }
 
 /* ---------- selection ---------- */
-function select(id) { S.sel = id; dirty.q = dirty.det = true; mapSync(); const i = S.incs.find((x) => x.id === id); if (MAP && i) MAP.panTo([i.lat, i.lon]); }
+function select(id) { S.sel = id; dirty.q = dirty.det = true; mapSync(); const i = S.incs.find((x) => x.id === id); if (MAP && i) MAP.pan(i.lat, i.lon); }
 
 /* ---------- rendering ---------- */
 const stLabel = { call: "CALL IN PROGRESS", await: "AWAITING DISPATCH", dispatched: "UNITS EN ROUTE", onscene: "ON SCENE", resolved: "CLOSED" };
@@ -338,15 +393,15 @@ function bindControls() {
   $("#full").onclick = () => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen && document.documentElement.requestFullscreen());
 }
 function start() {
-  S = freshState(); Object.values(incMk).forEach((m) => MAP && MAP.removeLayer(m)); Object.values(unitMk).forEach((m) => MAP && MAP.removeLayer(m)); Object.values(routeLn).forEach((m) => MAP && MAP.removeLayer(m)); incMk = {}; unitMk = {}; routeLn = {};
+  S = freshState(); [incMk, unitMk, routeLn].forEach((g) => Object.values(g).forEach((h) => h.remove())); incMk = {}; unitMk = {}; routeLn = {};
   S.incs = []; log("sys", "Shift started. Simulation: scripted calls replayed from the real extraction pipeline; dispatch and unit movement are simulated.");
   Object.keys(dirty).forEach((k) => (dirty[k] = true));
   const ids = Object.keys(D.scenarios); spawn(ids.includes("en_cardiac") ? "en_cardiac" : ids[0], false); setTimeout(() => S && spawn(ids.includes("ar_gulf_fire") ? "ar_gulf_fire" : ids[1]), 6000);
   $("#legend").innerHTML = Object.values(UM).map((m) => `<span style="color:${m.hex}">${ico(m.icon)} ${m.label}</span>`).join(" · ") + ' · <span style="color:#94a3b8">■ facility</span> · <span style="color:var(--P1)">● incident (colour = AI priority)</span>';
   S.units.forEach(unitMarker);
 }
-mapInit(); bindControls(); start();
-setTimeout(() => MAP && MAP.invalidateSize(), 300); addEventListener("resize", () => MAP && MAP.invalidateSize()); document.addEventListener("fullscreenchange", () => setTimeout(() => MAP && MAP.invalidateSize(), 200));
+bindControls(); start(); mapInit();
+setTimeout(() => MAP && MAP.resize(), 600); addEventListener("resize", () => MAP && MAP.resize()); document.addEventListener("fullscreenchange", () => setTimeout(() => MAP && MAP.resize(), 200));
 let last = performance.now(); let acc = 0;
 setInterval(() => { const n = performance.now(), dt = Math.min(0.5, (n - last) / 1000); last = n; tick(dt); acc += dt; if (acc > 0.25) { acc = 0; render(); } }, 100);
 window.__ccc = { get S() { return S; }, spawn, select, tick: (s) => { for (let i = 0; i < s * 10; i++) tick(0.1); render(); } };

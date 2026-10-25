@@ -239,8 +239,8 @@ function agentAdd(cls, text, note) { const d = document.createElement("div"); d.
 async function agentOpen() {
   $("#agentPanel").hidden = false; $("#agentBtn").hidden = true; $("#agentIn").focus();
   try { const st = await api("/api/agent/status"); const ai = st.mode !== "off";
-    $("#agentMode").textContent = ai ? `AI · ${st.provider}` : "keyword help (no AI configured)"; $("#agentMode").className = "agentmode " + (ai ? "ai" : "");
-    $("#agentNote").textContent = "Read-only: it cannot dispatch or change records." + (st.call_data_shared ? " Call data is shared with the AI provider." : ai ? " Call content is not shared with the AI." : ""); } catch { $("#agentMode").textContent = "offline"; }
+    $("#agentMode").textContent = ai ? `AI · ${st.provider}${st.local ? " (local)" : ""}${st.reachable === false ? " · not reachable" : ""}` : "keyword help (no AI configured)"; $("#agentMode").className = "agentmode " + (ai ? "ai" : "");
+    $("#agentNote").textContent = "Read-only: it cannot dispatch or change records." + (st.call_data_shared ? (st.local ? " Call data goes to the local model on this network." : " Call data is shared with the AI provider.") : ai ? " Call content is not shared with the AI." : ""); } catch { $("#agentMode").textContent = "offline"; }
   if (!$("#agentLog").children.length) agentAdd("a", "Hi, I can explain how the Co-Pilot works, protocol questions and system status. I cannot dispatch units, edit records or give medical advice.");
   $("#agentSug").innerHTML = SUG.map((q) => `<button type="button">${esc(q)}</button>`).join("");
   document.querySelectorAll("#agentSug button").forEach((b) => (b.onclick = () => agentAsk(b.textContent)));

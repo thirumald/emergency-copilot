@@ -183,3 +183,87 @@ def test_transcribe_with_fake_local_asr(tmp_path):
         out = c.post("/api/transcribe?language=ar", content=b"audio-bytes").json()
         assert out == {"text": "مرحبا", "confidence": 0.9, "language": "ar"}
         assert c.post("/api/transcribe", content=b"").status_code == 413
+
+
+# ------------------------------------------------------------------ local LLM (Ollama / OpenAI-compatible)
+import httpx  # noqa: E402
+
+from copilot.llm import OpenAICompatLLM, ToolsUnsupported, _to_openai  # noqa: E402
+
+
+def local_llm(handler, **extra):
+    cfg = LLMConfig(provider="ollama", model="llama3.1", base_url="http://localhost:11434/v1", extra={"tools": True, **extra})
+    return OpenAICompatLLM(cfg, http=httpx.Client(transport=httpx.MockTransport(handler))), cfg
+
+
+def oa(message, finish="stop"):
+    return httpx.Response(200, json={"choices": [{"message": message, "finish_reason": finish}]})
+
+
+def test_ollama_preset_from_env(monkeypatch):
+    monkeypatch.setenv("COPILOT_LLM", "ollama")
+    for k in ("COPILOT_LLM_MODEL", "COPILOT_LLM_BASE_URL", "COPILOT_LLM_TOOLS"):
+        monkeypatch.delenv(k, raising=False)
+    cfg = LLMConfig.from_env()
+    assert (cfg.provider, cfg.model, cfg.base_url, cfg.is_local) == ("ollama", "llama3.1", "http://localhost:11434/v1", True)
+    monkeypatch.setenv("COPILOT_LLM_TOOLS", "0")
+    assert LLMConfig.from_env().extra["tools"] is False
+    monkeypatch.setenv("COPILOT_LLM", "openai_compat")
+    monkeypatch.setenv("COPILOT_LLM_BASE_URL", "https://llm.example.com/v1")
+    assert LLMConfig.from_env().is_local is False
+
+
+def test_history_conversion_to_openai_format():
+    blocks = [NS(type="text", text="checking"), NS(type="tool_use", id="c1", name="get_sop_questions", input={"incident_type": "FIRE"})]
+    msgs = [{"role": "user", "content": "q"}, {"role": "assistant", "content": blocks},
+            {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "c1", "content": "[...]"}]}]
+    out = _to_openai("SYS", msgs)
+    assert out[0] == {"role": "system", "content": "SYS"} and out[2]["tool_calls"][0]["function"]["name"] == "get_sop_questions"
+    assert json.loads(out[2]["tool_calls"][0]["function"]["arguments"]) == {"incident_type": "FIRE"}
+    assert out[3] == {"role": "tool", "tool_call_id": "c1", "content": "[...]"}
+
+
+def test_local_agent_tool_loop(orch):
+    seen = []
+
+    def handler(req):
+        body = json.loads(req.content)
+        seen.append(body)
+        if len(seen) == 1:
+            return oa({"content": None, "tool_calls": [{"id": "c1", "type": "function", "function": {"name": "get_sop_questions", "arguments": '{"incident_type": "FIRE"}'}}]}, "tool_calls")
+        return oa({"content": "Fire calls ask whether anyone is trapped."})
+
+    llm, cfg = local_llm(handler)
+    out = SupportAgent(orch, llm, cfg).chat([{"role": "user", "content": "what does the fire protocol ask?"}])
+    assert out["mode"] == "agent" and "trapped" in out["reply"] and out["tools"][0]["name"] == "get_sop_questions"
+    assert seen[0]["tools"][0]["function"]["name"] == "search_help" and seen[1]["messages"][-1]["role"] == "tool"
+    assert all(t["function"]["name"] not in ("explain_call", "list_calls") for t in seen[0]["tools"])  # call tools stay hidden without opt-in
+
+
+def test_local_model_without_tool_support_falls_back_to_help_assistant(orch):
+    calls = []
+
+    def handler(req):
+        body = json.loads(req.content)
+        calls.append("tools" in body)
+        return httpx.Response(400, json={"error": "does not support tools"}) if "tools" in body else oa({"content": "Shadow mode hides AI output."})
+
+    llm, cfg = local_llm(handler)
+    ag = SupportAgent(orch, llm, cfg)
+    out = ag.chat([{"role": "user", "content": "what is shadow mode?"}])
+    assert out["mode"] == "assistant" and "Shadow" in out["reply"] and calls == [True, False] and llm.supports_tools is False
+    assert ag.chat([{"role": "user", "content": "again"}])["mode"] == "assistant"  # remembered, no wasted 400
+
+
+def test_local_status_ping_and_unreachable_degrades(orch):
+    def handler(req):
+        if req.url.path.endswith("/models"):
+            return httpx.Response(200, json={"data": []})
+        raise httpx.ConnectError("refused")
+
+    llm, cfg = local_llm(handler)
+    ag = SupportAgent(orch, llm, cfg)
+    st = ag.status()
+    assert st["local"] is True and st["reachable"] is True and st["provider"] == "ollama"
+    out = ag.chat([{"role": "user", "content": "what is shadow mode"}])
+    assert out["mode"] == "faq" and "unavailable" in out["reply"]  # server down: keyword help, never an error screen

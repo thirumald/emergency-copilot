@@ -84,6 +84,8 @@ extraction pipeline; **dispatch, units and their movement are simulated** (unit 
 Controls: pause, 1x/2x/4x time-lapse, autopilot (simulated call-taker and dispatcher) or manual Dispatch buttons, random incoming calls,
 spawn a call, **Surge x6** (units run out, requests queue), reset, full screen. ETAs are straight-line x1.3 at 60 km/h.
 
+**Map provider:** OpenStreetMap/CARTO (free, no key) by default. Google Maps is available through **Map settings** on the page (or `?gmapsKey=...&map=google`): there is no keyless Google map API, so you supply a Maps JavaScript API key, restricted to your site's HTTP referrer. It falls back to OpenStreetMap if the key is missing or Google fails. The Google path is covered by a test with a stand-in for the Google library, not against live Google.
+
 ## Optional AI services (all OFF by default)
 
 Nothing is sent to any AI service unless an operator turns it on. Every AI request is recorded in the audit log.
@@ -92,12 +94,14 @@ Nothing is sent to any AI service unless an operator turns it on. Every AI reque
 |---|---|---|
 | **Support agent** (Claude) | `COPILOT_LLM=anthropic`, `ANTHROPIC_API_KEY`, optional `COPILOT_LLM_MODEL` (default `claude-opus-5-5`) | Chat panel in the app (`/api/agent/chat`). **Read-only** tools: help search, protocol questions, system and audit status. Cannot dispatch, edit or accept anything, gives no medical advice. Uses the server-side refusal fallback. Without a key it falls back to keyword help |
 | Call-aware agent and **AI draft summary** | additionally `COPILOT_LLM_SEND_CALL_DATA=1` | Lets the agent explain a call's priority and cues, and drafts a narrative field (`/api/calls/{id}/ai-summary`). Separate opt-in because it sends call content to the provider. Priority stays rule-based |
-| Any OpenAI-compatible LLM | `COPILOT_LLM=openai_compat`, `COPILOT_LLM_BASE_URL`, `COPILOT_LLM_MODEL`, optional `COPILOT_LLM_API_KEY` | Text-only assistant and draft summary, for example a self-hosted vLLM so data stays on premise. No tool use |
+| **Local LLM (Ollama)** | install [Ollama](https://ollama.com), `ollama pull llama3.1`, then `COPILOT_LLM=ollama` (defaults: `http://localhost:11434/v1`, model `llama3.1`; override with `COPILOT_LLM_MODEL` / `COPILOT_LLM_BASE_URL`) | The same read-only agent and draft summary on a model that runs on your own machine, so no call data leaves it. Uses tool calling when the model supports it; otherwise (or with `COPILOT_LLM_TOOLS=0`) it answers from the help base |
+| Any OpenAI-compatible LLM | `COPILOT_LLM=openai_compat`, `COPILOT_LLM_BASE_URL`, `COPILOT_LLM_MODEL`, optional `COPILOT_LLM_API_KEY` | Same as above for vLLM, llama.cpp server or another compatible server |
 | **Whisper speech recognition** (local) | `pip install faster-whisper`, `COPILOT_ASR=whisper`, optional `COPILOT_WHISPER_MODEL` / `COPILOT_WHISPER_DEVICE` | Powers `/ws/audio/{call_id}` and `POST /api/transcribe` (raw audio body, `?language=ar`) to check real recordings. Runs on your machine; Arabic, English, Hindi, Tamil and Malayalam are supported by Whisper, but the Co-Pilot's extraction still understands only Arabic and English |
 
 The AI integrations are covered by tests that use fake providers; they have **not** been run against the live Claude API or a real Whisper
-model in this repository's CI (no key or model available there). The static pages (`usecases.html`, `ccc.html`) carry a keyword **Help
-assistant** that is not an AI model and sends nothing anywhere.
+model in this repository's CI (no key or model available there). The static pages (`usecases.html`, `ccc.html`) carry an **AI agent** button (robot icon). By default it is keyword search that sends
+nothing anywhere; if Ollama is running on the visitor's own computer (started with `OLLAMA_ORIGINS` allowing the page), the page detects it
+and answers with that local model, sending the question only to `localhost`.
 
 ## Configuration
 

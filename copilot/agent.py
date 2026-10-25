@@ -11,7 +11,7 @@ from collections import deque
 from typing import Any
 
 from .helpdocs import HelpIndex
-from .llm import AnthropicLLM, LLMConfig, LLMError, OpenAICompatLLM
+from .llm import AnthropicLLM, LLMConfig, LLMError, OpenAICompatLLM, ToolsUnsupported
 
 SYSTEM = """You are the support agent for the AI Emergency Call Co-Pilot used in an emergency Command and Control Centre.
 You help call-takers, supervisors and administrators understand and operate the system.
@@ -53,7 +53,9 @@ class SupportAgent:
         mode = "off"
         if self.llm is not None:
             mode = "agent" if self.llm.supports_tools else "assistant"
-        return {"mode": mode, "faq_only": self.llm is None, "provider": self.cfg.provider if self.llm else None,
+        reachable = self.llm.ping() if self.llm is not None and hasattr(self.llm, "ping") else None
+        return {"mode": mode, "faq_only": self.llm is None, "provider": self.cfg.provider if self.llm else None, "local": bool(self.llm and self.cfg.is_local),
+                "reachable": reachable,
                 "model": self.cfg.model if self.llm else None, "call_data_shared": bool(self.llm and self.cfg.send_call_data),
                 "unavailable_reason": self.cfg.reason or None, "read_only": True}
 
@@ -110,11 +112,12 @@ class SupportAgent:
             if self.llm is None:
                 reply, mode = self._faq_reply(question), "faq"
             elif not self.llm.supports_tools:
-                ctx = self.help.search(question, 3)
-                reply = self.llm.complete_text(SYSTEM + "\n\nHelp knowledge base:\n" + "\n".join(f"- {e['q']} {e['a']}" for e in ctx), question)
-                mode = "assistant"
+                reply, mode = self._assist(question), "assistant"
             else:
-                reply, mode = self._agent_loop(msgs, used), "agent"
+                try:
+                    reply, mode = self._agent_loop(msgs, used), "agent"
+                except ToolsUnsupported:  # local model without tool calling: answer from the help base instead
+                    reply, mode = self._assist(question), "assistant"
         except LLMError as e:
             reply, mode = f"The AI service could not answer ({e}). Keyword help: {self._faq_reply(question)}", "faq"
         except Exception as e:  # network / provider errors must never break the call-taker's screen
@@ -122,6 +125,10 @@ class SupportAgent:
         self.orch.audit.write(None, "support_agent", "agent_chat", {"question": question[:300], "mode": mode, "tools": [t["name"] for t in used],
                                                                     "provider": self.cfg.provider if self.llm else None, "call_data_shared": bool(self.llm and self.cfg.send_call_data)})
         return {"reply": reply, "mode": mode, "tools": used}
+
+    def _assist(self, question: str) -> str:
+        ctx = self.help.search(question, 3)
+        return self.llm.complete_text(SYSTEM + "\n\nHelp knowledge base:\n" + "\n".join(f"- {e['q']} {e['a']}" for e in ctx), question)
 
     def _faq_reply(self, q: str) -> str:
         hits = self.help.search(q, 2)

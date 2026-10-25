@@ -172,8 +172,8 @@
    ]
   },
   {
-   "q": "What is the support agent and what can it do?",
-   "a": "An optional AI assistant that explains how the system works, looks up protocol questions, explains a case's priority and cues, and checks system and audit status. It is read-only: it cannot dispatch, change records or give medical advice. Without an AI key it falls back to keyword help over these answers.",
+   "q": "What is the AI agent and what can it do?",
+   "a": "The AI agent is a read-only helper (the robot icon at the bottom right). It explains how the system works, looks up protocol questions, explains a case's priority and cues, and checks system and audit status. It cannot dispatch, change records or give medical advice. It can run on a local model on your own machine (Ollama), on Claude, or on any OpenAI-compatible server; with none configured it falls back to keyword help over these answers.",
    "keywords": [
     "agent",
     "support",
@@ -181,7 +181,13 @@
     "ai",
     "chat",
     "help",
-    "claude"
+    "claude",
+    "local",
+    "ollama",
+    "llama",
+    "model",
+    "icon",
+    "robot"
    ]
   },
   {
