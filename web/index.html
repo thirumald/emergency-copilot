@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Emergency Call Co-Pilot</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="brand"><span class="dot"></span> Emergency Call Co-Pilot <small>MVP</small></div>
+  <nav>
+    <button class="tab active" data-tab="taker">Call-taker</button>
+    <button class="tab" data-tab="wall">Supervisor wall</button>
+    <button class="tab" data-tab="admin">Admin &amp; audit</button>
+  </nav>
+  <div id="modeBadge" class="badge"></div>
+</header>
+
+<main id="taker" class="view">
+  <section class="controls card">
+    <select id="scenario"></select>
+    <label>Speed <input id="speed" type="number" min="0.5" max="50" step="0.5" value="3"></label>
+    <button id="startBtn" class="primary">Start simulated call</button>
+    <button id="micBtn">Mic (browser ASR)</button>
+    <select id="micLang"><option value="ar-AE">Arabic (UAE)</option><option value="ar-SA">Arabic (KSA)</option><option value="en-US">English</option></select>
+    <form id="typeForm"><input id="typeText" placeholder="Type a caller line…" dir="auto"><button>Send</button></form>
+    <button id="endBtn" class="danger">End call</button>
+    <span id="callId" class="muted"></span>
+  </section>
+
+  <div id="cues"></div>
+
+  <div class="grid">
+    <section class="card col">
+      <h2>Live transcript <span id="langInfo" class="muted"></span></h2>
+      <div id="transcript" class="transcript"></div>
+    </section>
+
+    <section class="card col">
+      <div class="sevrow"><div id="sevBadge" class="sev">–</div><div id="sevReasons" class="muted"></div></div>
+      <h2>Summary</h2>
+      <p id="summary" class="summary" dir="auto">Waiting for call…</p>
+      <h2>Suggested fields <span class="muted">(nothing reaches CAD until you accept)</span></h2>
+      <div id="fields"></div>
+    </section>
+
+    <section class="card col">
+      <h2>Location</h2>
+      <div id="leaflet" aria-label="Abu Dhabi map"></div>
+      <svg id="map" class="hidden" viewBox="0 0 300 220" role="img" aria-label="Schematic fallback map"></svg>
+      <div id="cands" class="muted"></div>
+      <h2>Next question</h2>
+      <div id="nextQ" class="nextq">–</div>
+      <h2>Checklist</h2>
+      <ul id="checklist" class="checklist"></ul>
+      <div id="instr"></div>
+    </section>
+  </div>
+  <footer class="muted" id="timings"></footer>
+</main>
+
+<main id="wall" class="view hidden">
+  <section class="card"><h2>Active calls</h2>
+    <table id="wallTable"><thead><tr><th>Call</th><th>Priority</th><th>Incident</th><th>Location</th><th>Language</th><th>Alerts</th><th>Age</th><th>Status</th></tr></thead><tbody></tbody></table>
+  </section>
+</main>
+
+<main id="admin" class="view hidden">
+  <div class="grid2">
+    <section class="card"><h2>Mode &amp; kill switches</h2>
+      <div id="modeCtl"></div><div id="featCtl"></div>
+      <label class="muted">API key <input id="apiKey" type="password" placeholder="only if the server sets COPILOT_API_KEY"></label>
+    </section>
+    <section class="card"><h2>Metrics</h2><pre id="metrics"></pre><button id="refreshMetrics">Refresh</button></section>
+    <section class="card"><h2>Shadow-mode gate</h2><pre id="shadowRep"></pre><button id="refreshShadow">Refresh</button></section>
+    <section class="card"><h2>Audit trail <span id="auditOk"></span></h2><div class="audit"><table id="auditTable"><tbody></tbody></table></div><button id="refreshAudit">Refresh</button></section>
+  </div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
