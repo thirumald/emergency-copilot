@@ -68,8 +68,12 @@ case record exposes only the non-AI parts. Unit recommendation and ETA remain Ph
 `web/usecases.html` is a self-contained static page (no server, no CDN, inline icons and illustrations, light/dark, responsive)
 for demos and bids: 25 use cases (17 built in the MVP, 8 roadmap) with filter and detail dialogs, a replayable simulated call,
 a schematic Abu Dhabi region map, roles, safety model, KPI targets and roadmap. The demo frames come from the real pipeline.
+It also has five-language audio samples (English, Arabic, Hindi, Tamil, Malayalam: synthetic voices, clips in `web/audio/`,
+text in `copilot/data/audio_samples.json`, regenerate with `python scripts/build_audio.py`, needs espeak-ng and ffmpeg) and a Google Maps
+embed (the only thing it loads from the internet). Hindi, Tamil and Malayalam are audio and text only: the Co-Pilot does not understand
+them yet, and the page shows that using the real extractor output.
 Regenerate after changing scenarios or data with `python scripts/build_usecases.py` (template: `web/usecases.template.html`).
-Also served by the app at `/usecases.html`, and published on GitHub Pages (`.github/workflows/pages.yml`): https://thirumald.github.io/emergency-copilot/
+Also served by the app at `/usecases.html`.
 
 ## Configuration
 

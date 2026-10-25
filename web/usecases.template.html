@@ -123,6 +123,17 @@ mark{background:color-mix(in srgb,var(--warn) 40%,transparent);color:inherit;bor
 table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;font-size:15px}
 th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}th{background:var(--surface2);font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}tr:last-child td{border-bottom:0}
 .tablewrap{overflow:auto;border-radius:16px}
+.gmap{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:12px;margin-bottom:8px}
+.gbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px}.gbar select{flex:1;min-width:220px}
+#gFrame{width:100%;height:460px;border:0;border-radius:14px;background:var(--surface2);display:block}
+@media(max-width:700px){#gFrame{height:340px}}
+.audgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.aud{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.aud header{display:flex;align-items:center;gap:10px}.aud header .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:#fff;background:var(--language)}
+.aud h3{margin:0;font-size:17px}.aud small{color:var(--muted)}.aud audio{width:100%;height:40px}
+.aud blockquote{margin:0;padding:10px 12px;border-radius:12px;background:var(--surface2);font-size:15px}
+.aud .res{font-size:13.5px;color:var(--muted);display:grid;gap:4px}.aud .res b{color:var(--text)}
+.st{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:800}.st.ok{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}.st.no{background:var(--surface2);color:var(--muted)}
 .phases{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;position:relative}
 .phase{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;border-top:5px solid var(--brand)}
 .phase:nth-child(2){border-top-color:var(--governance)}.phase:nth-child(3){border-top-color:var(--fire)}
@@ -130,6 +141,8 @@ th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}th{b
 .state{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:800;background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok);margin-left:6px}
 .state.todo{background:var(--surface2);color:var(--muted)}
 footer{padding:36px 0 60px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
+footer .by{margin-top:16px;padding-top:16px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--text);font-size:15px}
+footer .by .av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#ef4444,#f97316);color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px}
 @media(max-width:980px){.hero .wrap,.demo{grid-template-columns:1fr}.pipe{grid-template-columns:repeat(2,1fr)}.step::after{display:none!important}.phases{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.nav ul{display:none}}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
@@ -185,7 +198,7 @@ footer{padding:36px 0 60px;color:var(--muted);font-size:14px;border-top:1px soli
 <header class="nav"><div class="wrap">
   <a class="logo" href="#top"><span class="mark"><svg class="i"><use href="#i-siren"/></svg></span> CCC Co-Pilot</a>
   <ul>
-    <li><a href="#how">How it works</a></li><li><a href="#usecases">Use cases</a></li><li><a href="#demo">Live demo</a></li>
+    <li><a href="#how">How it works</a></li><li><a href="#usecases">Use cases</a></li><li><a href="#demo">Live demo</a></li><li><a href="#audio">Audio</a></li>
     <li><a href="#coverage">Abu Dhabi</a></li><li><a href="#roles">Roles</a></li><li><a href="#trust">Safety</a></li><li><a href="#roadmap">Roadmap</a></li>
   </ul>
   <button class="iconbtn" id="theme" aria-label="Toggle dark mode"><svg class="i"><use href="#i-moon"/></svg></button>
@@ -276,15 +289,30 @@ footer{padding:36px 0 60px;color:var(--muted);font-size:14px;border-top:1px soli
   </div>
 </div></section>
 
-<section class="block" id="coverage"><div class="wrap">
+<section class="block" id="audio"><div class="wrap">
+  <span class="kicker">Audio samples</span><h2>The same emergency, in five languages</h2>
+  <p class="sub">Press play to hear a caller report a collapse in each language. The voices are synthetic (offline speech synthesis) and the translations are illustrative, so they should be reviewed by native speakers. Real calls are noisy and unscripted. Below each clip is what the Co-Pilot's current code finds in the text.</p>
+  <div class="audgrid" id="audGrid"></div>
+  <div class="callout warn" style="margin-top:18px"><b>Language support today.</b> Arabic and English are built and tested. Hindi, Tamil and Malayalam are shown as audio and text only: speech recognition and extraction for them are planned (Phase 2 multilingual work), so the Co-Pilot does not yet understand them and says so.</div>
+</div></section>
+
+<section class="block alt" id="coverage"><div class="wrap">
   <span class="kicker">Abu Dhabi coverage</span><h2>Three regions, one gazetteer, nearest facilities per case</h2>
-  <p class="sub">Spoken places resolve to a region and area. Each case lists the nearest hospital, police and civil defence facility for the responding agencies. Outline is schematic for orientation only; coordinates are approximate demo data.</p>
+  <p class="sub">Spoken places resolve to a region and area. Each case lists the nearest hospital, police and civil defence facility for the responding agencies. The Google map shows the real geography; the region overview below is a schematic. Coordinates are approximate demo data.</p>
+  <div class="gmap">
+    <div class="gbar"><label for="gSel" class="sr">Show on map</label>
+      <select id="gSel" aria-label="Show on Google map"></select>
+      <a class="btn" id="gOpen" target="_blank" rel="noopener"><svg class="i" aria-hidden="true"><use href="#i-pin"/></svg> Open in Google Maps</a></div>
+    <iframe id="gFrame" title="Google map of Abu Dhabi" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+    <p class="note" style="margin:8px 4px 0">Real Google map embed (needs an internet connection; loading it shares your IP address with Google). Pick a region, demo case or facility to jump to it. For an on-premise centre the call-taker panel uses a map server you control instead.</p>
+  </div>
+  <h3 style="margin:26px 0 10px">Region overview</h3>
   <div class="mapwrap"><svg id="map" viewBox="0 0 860 500" role="img" aria-label="Schematic map of the Emirate of Abu Dhabi showing the three regions, facilities and demo case locations"></svg>
     <div class="legend"><span><i style="background:#3b82f6"></i>Abu Dhabi Region</span><span><i style="background:#16a34a"></i>Al Ain Region</span><span><i style="background:#f97316"></i>Al Dhafra Region</span>
     <span><i style="background:#22c55e;border-radius:50%"></i>Hospital</span><span><i style="background:#0ea5e9;border-radius:50%"></i>Police</span><span><i style="background:#eab308;border-radius:50%"></i>Civil defence</span><span><i style="background:#ef4444;border-radius:50%"></i>Demo case</span></div></div>
 </div></section>
 
-<section class="block alt" id="roles"><div class="wrap">
+<section class="block" id="roles"><div class="wrap">
   <span class="kicker">Who uses it</span><h2>One system, four roles</h2><p class="sub">&nbsp;</p>
   <div class="cards3">
     <div class="tile"><div class="ic" style="background:#2457e6"><svg class="i"><use href="#i-headset"/></svg></div><h3>Call-taker</h3><p>Stays on the call, not on the keyboard.</p><ul><li>Live transcript with cue words highlighted</li><li>One-click accept, edit or reject per field</li><li>Next protocol question in Arabic or English</li></ul></div>
@@ -333,7 +361,8 @@ footer{padding:36px 0 60px;color:var(--muted);font-size:14px;border-top:1px soli
 <dialog id="dlg" aria-labelledby="dTitle"><div class="m-head" id="dHead"><svg class="i" id="dIcon" style="width:34px;height:34px"></svg><div><h3 id="dTitle"></h3><small id="dMeta"></small></div><button class="iconbtn" id="dClose" aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
 <div class="m-body" id="dBody"></div></dialog>
 
-<footer><div class="wrap">Demo page for the AI Emergency Call Co-Pilot MVP. SOP text, incident taxonomy, gazetteer, facilities and hotline data are sample data with approximate coordinates and must be replaced with approved operational data before any live use. Roadmap items are plans, not delivered features. Icons and illustrations are drawn inline; the page loads nothing from the internet.</div></footer>
+<footer><div class="wrap">Demo page for the AI Emergency Call Co-Pilot MVP. SOP text, incident taxonomy, gazetteer, facilities and hotline data are sample data with approximate coordinates and must be replaced with approved operational data before any live use. Roadmap items are plans, not delivered features. Icons, illustrations and audio clips are embedded in this file; the only thing loaded from the internet is the Google map.
+  <div class="by"><span class="av" aria-hidden="true">TD</span><span>Created by <b>Thirumal Dharmalingam</b> · © 2026</span></div></div></footer>
 
 <script>
 const D = /*__DATA__*/null;
@@ -515,6 +544,37 @@ function stop() { clearInterval(timer); timer = null; if (sc) draw(); }
 $("#play").onclick = () => (timer ? stop() : start());
 $("#next").onclick = () => { stop(); step(); };
 $("#reset").onclick = () => { stop(); idx = 0; draw(); };
+
+/* ---------- audio samples ---------- */
+$("#audGrid").innerHTML = D.audio.map((a) => {
+  const ok = a.incident !== "UNKNOWN", sup = a.id === "en" || a.id === "ar";
+  return `<article class="aud"><header><span class="ic">${ico("wave")}</span><div><h3>${esc(a.name)}${a.native !== a.name ? ` <span dir="auto" style="font-weight:600;color:var(--muted)">· ${esc(a.native)}</span>` : ""}</h3>
+    <small>${sup ? '<span class="st ok">Co-Pilot support: built</span>' : '<span class="st no">Co-Pilot support: planned</span>'}</small></div></header>
+    <audio controls preload="none" src="${a.src}" aria-label="${esc(a.name)} sample call"></audio>
+    <blockquote dir="${a.dir}" lang="${a.id}">${esc(a.text)}</blockquote>
+    <div class="res"><span>Extracted by the current code:</span>
+      <span><b>Incident:</b> ${ok ? esc(a.incident) + " (" + Math.round(a.conf * 100) + "%)" : "not detected"}</span>
+      <span><b>Alerts:</b> ${a.cues.length ? esc(a.cues.join(", ")) : "none"}</span>
+      <span><b>Location:</b> ${a.location ? esc(a.location) : "not matched"}</span></div></article>`;
+}).join("");
+
+/* ---------- Google map (embed, no API key) ---------- */
+(function gmap() {
+  const opts = [["Regions", D.regions.map((r) => [r.name, r.lat, r.lon, r.zoom])],
+    ["Demo cases", Object.values(D.scenarios).filter((c) => c.pin).map((c) => [`${c.pin.name} (${c.title.split(" — ")[0]})`, c.pin.lat, c.pin.lon, 15])],
+    ["Hospitals", D.facilities.filter((f) => f.kind === "hospital").map((f) => [f.name, f.lat, f.lon, 16])],
+    ["Police", D.facilities.filter((f) => f.kind === "police").map((f) => [f.name, f.lat, f.lon, 16])],
+    ["Civil defence", D.facilities.filter((f) => f.kind === "civil_defence").map((f) => [f.name, f.lat, f.lon, 16])]];
+  const all = [];
+  $("#gSel").innerHTML = opts.map(([g, items]) => `<optgroup label="${g}">${items.map((it) => { all.push(it); return `<option value="${all.length - 1}">${esc(it[0])}</option>`; }).join("")}</optgroup>`).join("");
+  function show(i) {
+    const [name, lat, lon, z] = all[i];
+    $("#gFrame").src = `https://maps.google.com/maps?q=${lat},${lon}(${encodeURIComponent(name.replace(/[()]/g, ""))})&z=${z}&hl=en&output=embed`;
+    $("#gOpen").href = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
+  }
+  $("#gSel").onchange = (e) => show(+e.target.value);
+  show(0);
+})();
 
 /* ---------- Abu Dhabi schematic map ---------- */
 (function map() {

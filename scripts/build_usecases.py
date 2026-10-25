@@ -5,6 +5,7 @@ so the page cannot drift from what the Co-Pilot actually extracts.
 """
 from __future__ import annotations
 
+import base64
 import json
 import sys
 import tempfile
@@ -15,6 +16,8 @@ sys.path.insert(0, str(ROOT))
 
 from copilot.audit import AuditLog  # noqa: E402
 from copilot.cad import MockCAD  # noqa: E402
+from copilot.extractor import extract  # noqa: E402
+from copilot.lang import detect_lang  # noqa: E402
 from copilot.models import Segment  # noqa: E402
 from copilot.orchestrator import Orchestrator  # noqa: E402
 from copilot.speech import load_scenarios  # noqa: E402
@@ -44,14 +47,33 @@ def frames_for(orch: Orchestrator, sc: dict) -> list[dict]:
     return out
 
 
+def audio_samples(orch: Orchestrator) -> list[dict]:
+    """Embed the clips and run the real extractor on each transcript, so unsupported languages show as unsupported."""
+    out = []
+    for smp in json.loads((ROOT / "copilot" / "data" / "audio_samples.json").read_text(encoding="utf-8"))["samples"]:
+        ex = extract(smp["text"])
+        loc = orch.location.resolve(smp["text"])
+        mp3 = (ROOT / "web" / "audio" / f"{smp['id']}.mp3").read_bytes()
+        out.append({**{k: smp[k] for k in ("id", "name", "native", "dir", "text")},
+                    "src": "data:audio/mpeg;base64," + base64.b64encode(mp3).decode(), "kb": len(mp3) // 1024,
+                    "lang": detect_lang(smp["text"]).lang, "incident": ex.incident_type, "conf": ex.incident_conf,
+                    "cues": [c.label for c in ex.cues], "location": loc[0].name if loc else None})
+    return out
+
+
+def pin_for(orch: Orchestrator, call_id: str) -> dict | None:
+    loc = orch.case(orch.calls[call_id]).get("location")
+    return {"name": loc["name"], "lat": loc["lat"], "lon": loc["lon"], "region": loc["region"]} if loc else None
+
+
 def main() -> None:
     tmp = Path(tempfile.mkdtemp())
     orch = Orchestrator(AuditLog(tmp / "a.jsonl"), MockCAD(tmp / "c"))
     scen = load_scenarios()
     data = {
-        "scenarios": {sid: {"id": sid, "title": sc["title"], "aml": sc.get("aml"), "frames": frames_for(orch, sc)} for sid, sc in scen.items()},
+        "scenarios": {sid: {"id": sid, "title": sc["title"], "aml": sc.get("aml"), "frames": frames_for(orch, sc), "pin": pin_for(orch, "DEMO-" + sid)} for sid, sc in scen.items()},
         "places": [{k: e[k] for k in ("name", "name_ar", "type", "lat", "lon", "region")} for e in orch.location.gaz.entries],
-        "facilities": orch.ref.facilities, "regions": orch.ref.regions,
+        "audio": audio_samples(orch), "facilities": orch.ref.facilities, "regions": orch.ref.regions,
     }
     tpl = (ROOT / "web" / "usecases.template.html").read_text(encoding="utf-8")
     html = tpl.replace("/*__DATA__*/null", json.dumps(data, ensure_ascii=False, separators=(",", ":")))
