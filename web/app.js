@@ -4,7 +4,7 @@ const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "
 const store = { get: (k) => { try { return localStorage.getItem(k) || ""; } catch { return ""; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
 let KEY = store.get("copilot_key");
 let cfg = { tile_url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png", attribution: "© OpenStreetMap contributors", center: [24.4539, 54.3773], zoom: 11 };
-let lmap = null, gazLayer = null, candLayer = null, lastPin = "";
+let facilities = [], regions = [], lmap = null, facLayer = null, gazLayer = null, candLayer = null, lastPin = "";
 let callId = null, ws = null, S = null, wallWs = null, gaz = [], lastCueCount = 0;
 
 async function api(path, opts = {}) {
@@ -30,7 +30,7 @@ async function init() {
   const sc = await api("/api/scenarios");
   $("#scenario").innerHTML = sc.map((s) => `<option value="${esc(s.id)}">${esc(s.title)}</option>`).join("");
   gaz = await api("/api/gazetteer");
-  try { cfg = await api("/api/config"); } catch {}
+  try { cfg = await api("/api/config"); [facilities, regions] = await Promise.all([api("/api/facilities"), api("/api/regions")]); } catch {}
   const q = new URLSearchParams(location.search).get("call");
   if (q) connect(q);
 }
@@ -130,6 +130,7 @@ function render() {
   $("#nextQ").innerHTML = q ? `<div dir="auto"><b>${esc(q[q.primary])}</b></div><div class="muted" dir="auto">${esc(q[q.primary === "ar" ? "en" : "ar"])}</div>` : (S.status === "active" ? "All protocol questions answered." : "–");
   $("#checklist").innerHTML = S.checklist.map((i) => `<li class="${i.done ? "done" : ""}">${esc(i.question.en)}</li>`).join("");
   $("#instr").innerHTML = S.instructions.map((i) => `<div class="instr"><b>${esc(i.cue.replace("_", " "))}</b><div>${esc(i.en)}</div><div dir="rtl">${esc(i.ar)}</div><div class="muted">${esc(i.note)}</div></div>`).join("");
+  drawCase();
   drawMap();
   const tm = S.timings_ms || {};
   $("#timings").textContent = `Processing ms: total ${tm.total ?? "–"} · extract ${tm.extract ?? "–"} · location ${tm.location ?? "–"} · reason ${tm.reason ?? "–"} · sop ${tm.sop ?? "–"}   (in-process compute only)`;
@@ -144,7 +145,10 @@ function drawMap() {
   if (!lmap) {
     lmap = L.map("leaflet", { zoomControl: true }).setView(cfg.center, cfg.zoom);
     L.tileLayer(cfg.tile_url, { maxZoom: 19, attribution: cfg.attribution }).addTo(lmap);
-    gazLayer = L.layerGroup().addTo(lmap); candLayer = L.layerGroup().addTo(lmap);
+    gazLayer = L.layerGroup().addTo(lmap); facLayer = L.layerGroup().addTo(lmap); candLayer = L.layerGroup().addTo(lmap);
+    regions.forEach((r) => L.circleMarker([r.lat, r.lon], { radius: 1, opacity: 0, fillOpacity: 0, interactive: false }).bindTooltip(`${r.name} · ${r.name_ar}`, { permanent: true, direction: "top", className: "regionlbl" }).addTo(lmap));
+    const FC = { hospital: "#22c55e", police: "#3b82f6", civil_defence: "#f97316" };
+    facilities.forEach((f) => L.circleMarker([f.lat, f.lon], { radius: 5, color: FC[f.kind], weight: 2, fillColor: FC[f.kind], fillOpacity: 0.8 }).bindTooltip(`${f.name} (${f.kind.replace("_", " ")})`).addTo(facLayer));
     gaz.forEach((g) => L.circleMarker([g.lat, g.lon], { radius: 4, color: "#64748b", weight: 1, fillOpacity: 0.7 }).bindTooltip(`${g.name} · ${g.name_ar}`).addTo(gazLayer));
   }
   candLayer.clearLayers();
@@ -153,9 +157,31 @@ function drawMap() {
     L.circleMarker([c.lat, c.lon], { radius: i === 0 ? 10 : 7, color: col, weight: 3, fillColor: col, fillOpacity: 0.35 })
       .bindTooltip(`${c.name} ${Math.round(c.confidence * 100)}%`, { permanent: i === 0 }).addTo(candLayer);
   });
+  ((S.case && S.case.facilities) || []).forEach((f) => L.polyline([[S.case.location.lat, S.case.location.lon], [f.lat, f.lon]], { color: "#64748b", weight: 2, dashArray: "4 4" }).addTo(candLayer));
   if (S.aml) L.circle([S.aml.lat, S.aml.lon], { radius: S.aml.accuracy_m || 100, color: "#3b82f6", weight: 1, fillOpacity: 0.12 }).addTo(candLayer);
   const key = cands[0] ? `${S.call_id}:${cands[0].name}` : "";
   if (key && key !== lastPin) { lastPin = key; lmap.setView([cands[0].lat, cands[0].lon], 14); }
+}
+function drawCase() {
+  const c = S.case; if (!c) return;
+  const loc = c.location, row = (k, v) => (v ? `<dt>${k}</dt><dd dir="auto">${v}</dd>` : "");
+  let h = `<div class="cn">${esc(c.case_number)} <span class="chip">${esc(c.status)}</span></div><dl>`;
+  if (loc) {
+    h += row("Region", `${esc(loc.region)} <span class="muted">${esc(loc.region_ar || "")}</span>`);
+    h += row("Area", esc(loc.area));
+    h += row("Location", `${esc(loc.name)}${loc.detail ? ", " + esc(loc.detail) : ""} <span class="muted">(${Math.round(loc.confidence * 100)}%, ${esc(loc.status)})</span>`);
+    h += row("Coordinates", `${loc.lat.toFixed(4)}, ${loc.lon.toFixed(4)}`);
+  }
+  if (c.incident) h += row("Incident", `${esc(c.incident.label)} <span class="muted">${esc(c.incident.code || "")}</span>`);
+  if (c.priority) h += row("Priority", esc(c.priority.value));
+  const p = c.people || {};
+  if (p.persons || p.ages || p.injuries) h += row("People", [p.persons && p.persons + " involved", p.ages && "age " + p.ages, p.injuries].filter(Boolean).map(esc).join("; "));
+  if (c.agencies && c.agencies.length) h += row("Agencies", c.agencies.map((a) => `<span class="chip">${esc(a.name)} ${esc(a.hotline || "")}</span>`).join(""));
+  (c.facilities || []).forEach((f) => (h += row("Nearest " + f.kind.replace("_", " "), `${esc(f.name)} <span class="muted">${f.distance_km} km straight-line</span>`)));
+  h += row("Caller", [c.caller.number, c.caller.lang !== "unknown" ? c.caller.lang + (c.caller.dialect ? "/" + c.caller.dialect : "") : ""].filter(Boolean).map(esc).join(" · "));
+  h += "</dl>" + (c.flags || []).map((f) => `<span class="chip warn">${esc(f)}</span>`).join("");
+  h += `<ul class="tl">${c.timeline.map((e) => `<li><b>+${e.t_s}s</b> ${esc(e.event)}</li>`).join("")}</ul>`;
+  $("#caseCard").innerHTML = h;
 }
 function drawSchematic(cands) {
   const W = 300, H = 220, pad = 16, lats = gaz.map((g) => g.lat), lons = gaz.map((g) => g.lon);
@@ -174,7 +200,7 @@ function openWall() {
 }
 function drawWall(calls) {
   $("#wallTable tbody").innerHTML = calls.map((c) => `<tr class="row" data-id="${esc(c.call_id)}">
-    <td>${esc(c.call_id)}</td><td>${c.severity ? `<span class="sev ${c.severity.level}" style="font-size:13px;padding:2px 8px">${c.severity.level}</span>` : "–"}</td>
+    <td>${esc(c.case_number)}</td><td>${esc(c.region ?? "–")}</td><td>${c.severity ? `<span class="sev ${c.severity.level}" style="font-size:13px;padding:2px 8px">${c.severity.level}</span>` : "–"}</td>
     <td>${esc(c.incident ?? "–")}</td><td>${esc(c.location ?? "–")}</td><td>${esc(c.lang)}${c.dialect ? " / " + esc(c.dialect) : ""}</td>
     <td>${c.cues.map((x) => `<span class="alt">${esc(x.label)}</span>`).join(" ")}</td>
     <td>${c.age_s}s${c.stuck ? ' <span class="alt">silent ' + c.silent_s + "s</span>" : ""}</td><td>${esc(c.status)}</td></tr>`).join("") || '<tr><td colspan="8" class="muted">No calls yet</td></tr>';

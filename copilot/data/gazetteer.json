@@ -18,7 +18,9 @@
     "شارع الشيخ زايد بن سلطان",
     "شارع الشيخ زايد",
     "الشيخ زايد"
-   ]
+   ],
+   "region": "Abu Dhabi Region",
+   "area": "Abu Dhabi Island"
   },
   {
    "id": "hamdan",
@@ -33,7 +35,9 @@
     "sheikh hamdan street",
     "شارع حمدان",
     "حمدان"
-   ]
+   ],
+   "region": "Abu Dhabi Region",
+   "area": "Abu Dhabi Island"
   },
   {
    "id": "airport",
@@ -47,7 +51,9 @@
     "airport street",
     "شارع المطار",
     "طريق المطار"
-   ]
+   ],
+   "region": "Abu Dhabi Region",
+   "area": "Abu Dhabi Island"
   },
   {
    "id": "corniche",
@@ -64,7 +70,9 @@
     "شارع الكورنيش",
     "الكورنيش",
     "كورنيش"
-   ]
+   ],
+   "region": "Abu Dhabi Region",
+   "area": "Abu Dhabi Island"
   },
   {
    "id": "khalidiya",
@@ -79,7 +87,9 @@
     "khalidiya",
     "al khalidiya",
     "الخالدية"
-   ]
+   ],
+   "region": "Abu Dhabi Region",
+   "area": "Abu Dhabi Island"
   },
   {
    "id": "bateen",
@@ -93,7 +103,9 @@
     "bateen",
     "al batin",
     "البطين"
-   ]
+   ],
+   "region": "Abu Dhabi Region",
+   "area": "Abu Dhabi Island"
   },
   {
    "id": "mushrif",
@@ -106,7 +118,9 @@
     "al mushrif",
     "mushrif",
     "المشرف"
-   ]
+   ],
+   "region": "Abu Dhabi Region",
+   "area": "Abu Dhabi Island"
   },
   {
    "id": "mussafah",
@@ -121,7 +135,9 @@
     "mussafa",
     "مصفح",
     "المصفح"
-   ]
+   ],
+   "region": "Abu Dhabi Region",
+   "area": "Mussafah & Mainland"
   },
   {
    "id": "khalifacity",
@@ -134,7 +150,9 @@
     "khalifa city",
     "madinat khalifa",
     "مدينة خليفة"
-   ]
+   ],
+   "region": "Abu Dhabi Region",
+   "area": "Mussafah & Mainland"
   },
   {
    "id": "reem",
@@ -148,7 +166,9 @@
     "reem island",
     "الريم",
     "جزيرة الريم"
-   ]
+   ],
+   "region": "Abu Dhabi Region",
+   "area": "Reem & Maryah Islands"
   },
   {
    "id": "maryah",
@@ -163,7 +183,9 @@
     "al maryah",
     "جزيرة المارية",
     "المارية"
-   ]
+   ],
+   "region": "Abu Dhabi Region",
+   "area": "Reem & Maryah Islands"
   },
   {
    "id": "saadiyat",
@@ -177,7 +199,9 @@
     "saadiyat",
     "السعديات",
     "جزيرة السعديات"
-   ]
+   ],
+   "region": "Abu Dhabi Region",
+   "area": "Saadiyat & Yas"
   },
   {
    "id": "yasisl",
@@ -191,7 +215,9 @@
     "yas",
     "جزيرة ياس",
     "ياس"
-   ]
+   ],
+   "region": "Abu Dhabi Region",
+   "area": "Saadiyat & Yas"
   },
   {
    "id": "mosque",
@@ -207,7 +233,9 @@
     "جامع الشيخ زايد الكبير",
     "جامع الشيخ زايد",
     "الجامع الكبير"
-   ]
+   ],
+   "region": "Abu Dhabi Region",
+   "area": "Mussafah & Mainland"
   },
   {
    "id": "marina",
@@ -219,7 +247,9 @@
    "aliases": [
     "marina mall",
     "مارينا مول"
-   ]
+   ],
+   "region": "Abu Dhabi Region",
+   "area": "Abu Dhabi Island"
   },
   {
    "id": "yasmall",
@@ -231,7 +261,9 @@
    "aliases": [
     "yas mall",
     "ياس مول"
-   ]
+   ],
+   "region": "Abu Dhabi Region",
+   "area": "Saadiyat & Yas"
   },
   {
    "id": "wahda",
@@ -244,7 +276,9 @@
     "al wahda mall",
     "wahda mall",
     "الوحدة مول"
-   ]
+   ],
+   "region": "Abu Dhabi Region",
+   "area": "Abu Dhabi Island"
   },
   {
    "id": "skmc",
@@ -257,7 +291,9 @@
     "sheikh khalifa medical city",
     "skmc",
     "مدينة الشيخ خليفة الطبية"
-   ]
+   ],
+   "region": "Abu Dhabi Region",
+   "area": "Abu Dhabi Island"
   },
   {
    "id": "ccad",
@@ -270,7 +306,189 @@
     "cleveland clinic abu dhabi",
     "cleveland clinic",
     "كليفلاند كلينك"
-   ]
+   ],
+   "region": "Abu Dhabi Region",
+   "area": "Reem & Maryah Islands"
+  },
+  {
+   "id": "alain",
+   "type": "district",
+   "name": "Al Ain City Centre",
+   "name_ar": "وسط مدينة العين",
+   "lat": 24.2075,
+   "lon": 55.7447,
+   "aliases": [
+    "al ain city centre",
+    "al ain city center",
+    "al ain",
+    "downtown al ain",
+    "وسط مدينة العين",
+    "مدينة العين",
+    "العين"
+   ],
+   "region": "Al Ain Region",
+   "area": "Al Ain City"
+  },
+  {
+   "id": "jimi",
+   "type": "district",
+   "name": "Al Jimi",
+   "name_ar": "الجيمي",
+   "lat": 24.23,
+   "lon": 55.76,
+   "aliases": [
+    "al jimi",
+    "jimi",
+    "al jimi mall",
+    "الجيمي"
+   ],
+   "region": "Al Ain Region",
+   "area": "Al Ain City"
+  },
+  {
+   "id": "hafeet",
+   "type": "street",
+   "name": "Jebel Hafeet Road",
+   "name_ar": "طريق جبل حفيت",
+   "lat": 24.06,
+   "lon": 55.77,
+   "aliases": [
+    "jebel hafeet road",
+    "jebel hafeet",
+    "jabal hafit",
+    "jebel hafit road",
+    "طريق جبل حفيت",
+    "جبل حفيت",
+    "شارع جبل حفيت"
+   ],
+   "region": "Al Ain Region",
+   "area": "Jebel Hafeet"
+  },
+  {
+   "id": "aoasis",
+   "type": "landmark",
+   "name": "Al Ain Oasis",
+   "name_ar": "واحة العين",
+   "lat": 24.223,
+   "lon": 55.777,
+   "aliases": [
+    "al ain oasis",
+    "ain oasis",
+    "واحة العين"
+   ],
+   "region": "Al Ain Region",
+   "area": "Al Ain City"
+  },
+  {
+   "id": "azoo",
+   "type": "landmark",
+   "name": "Al Ain Zoo",
+   "name_ar": "حديقة حيوان العين",
+   "lat": 24.179,
+   "lon": 55.736,
+   "aliases": [
+    "al ain zoo",
+    "ain zoo",
+    "حديقة حيوان العين"
+   ],
+   "region": "Al Ain Region",
+   "area": "Al Ain City"
+  },
+  {
+   "id": "mzayed",
+   "type": "district",
+   "name": "Madinat Zayed",
+   "name_ar": "مدينة زايد",
+   "lat": 23.654,
+   "lon": 53.705,
+   "aliases": [
+    "madinat zayed",
+    "medinat zayed",
+    "مدينة زايد"
+   ],
+   "region": "Al Dhafra Region",
+   "area": "Madinat Zayed"
+  },
+  {
+   "id": "ruwais",
+   "type": "district",
+   "name": "Ruwais",
+   "name_ar": "الرويس",
+   "lat": 24.11,
+   "lon": 52.73,
+   "aliases": [
+    "ruwais",
+    "al ruwais",
+    "ar ruwais",
+    "الرويس",
+    "رويس"
+   ],
+   "region": "Al Dhafra Region",
+   "area": "Ruwais"
+  },
+  {
+   "id": "ruwind",
+   "type": "landmark",
+   "name": "Ruwais Industrial Area",
+   "name_ar": "منطقة الرويس الصناعية",
+   "lat": 24.12,
+   "lon": 52.72,
+   "aliases": [
+    "ruwais industrial area",
+    "ruwais industrial",
+    "al ruwais industrial area",
+    "منطقة الرويس الصناعية",
+    "الرويس الصناعية",
+    "المنطقة الصناعية في الرويس"
+   ],
+   "region": "Al Dhafra Region",
+   "area": "Ruwais"
+  },
+  {
+   "id": "liwa",
+   "type": "district",
+   "name": "Liwa Oasis",
+   "name_ar": "واحة ليوا",
+   "lat": 23.13,
+   "lon": 53.79,
+   "aliases": [
+    "liwa oasis",
+    "liwa",
+    "ليوا",
+    "واحة ليوا"
+   ],
+   "region": "Al Dhafra Region",
+   "area": "Liwa"
+  },
+  {
+   "id": "ghayathi",
+   "type": "district",
+   "name": "Ghayathi",
+   "name_ar": "غياثي",
+   "lat": 23.842,
+   "lon": 52.8,
+   "aliases": [
+    "ghayathi",
+    "gayathi",
+    "غياثي"
+   ],
+   "region": "Al Dhafra Region",
+   "area": "Ghayathi"
+  },
+  {
+   "id": "mirfa",
+   "type": "district",
+   "name": "Al Mirfa",
+   "name_ar": "المرفأ",
+   "lat": 24.09,
+   "lon": 53.45,
+   "aliases": [
+    "al mirfa",
+    "mirfa",
+    "المرفأ"
+   ],
+   "region": "Al Dhafra Region",
+   "area": "Al Mirfa"
   }
  ]
 }

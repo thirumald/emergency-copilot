@@ -100,7 +100,7 @@ _AGE_RES = [
 ]
 _MONTHS_RE = re.compile(rf"{_NUM}\s*months?\s*old")
 _PERSON_RES = [
-    re.compile(rf"\b{_NUM}\s+(?:people|persons|men|women|victims|injured|casualties|of us)"),
+    re.compile(rf"\b{_NUM}\s+(?:people|persons|men|women|workers|employees|passengers|residents|victims|injured|casualties|of us)"),
     re.compile(rf"(?<!\w){_NUM}\s*(?:اشخاص|شخص|مصابين|مصابي|جرحي|ناس|رجال|نساء)"),
 ]
 _PLATE_RE = re.compile(r"(?:number plate|license plate|plate|registration|لوحه|لوحة)\s*(?:number|is|رقم|:)?\s*([A-Za-zء-ي]{0,2}\s?\d{1,5})")

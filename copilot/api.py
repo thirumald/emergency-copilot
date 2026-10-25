@@ -104,6 +104,18 @@ def create_app(var_dir: Path | None = None, cad: CADAdapter | None = None, mode:
     def get_call(call_id: str):
         return orch.public_state(call_or_404(call_id))
 
+    @app.get("/api/calls/{call_id}/case", dependencies=protected)
+    def get_case(call_id: str):
+        return orch.case(call_or_404(call_id))
+
+    @app.get("/api/regions", dependencies=protected)
+    def regions():
+        return orch.ref.regions
+
+    @app.get("/api/facilities", dependencies=protected)
+    def facilities():
+        return orch.ref.facilities
+
     @app.post("/api/calls/{call_id}/segments", dependencies=protected)
     def post_segment(call_id: str, body: SegmentIn):
         call_or_404(call_id)
@@ -170,7 +182,7 @@ def create_app(var_dir: Path | None = None, cad: CADAdapter | None = None, mode:
 
     @app.get("/api/gazetteer", dependencies=protected)
     def gazetteer():
-        return [{k: e[k] for k in ("id", "name", "name_ar", "type", "lat", "lon")} for e in orch.location.gaz.entries]
+        return [{k: e[k] for k in ("id", "name", "name_ar", "type", "lat", "lon", "region", "area")} for e in orch.location.gaz.entries]
 
     @app.get("/api/audit", dependencies=protected)
     def audit(call_id: str | None = None, limit: int = 300):

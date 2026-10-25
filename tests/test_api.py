@@ -66,3 +66,17 @@ def test_api_key_enforced(tmp_path, monkeypatch):
     with pytest.raises(Exception):
         with c.websocket_connect("/ws/wall"):
             pass
+
+
+def test_case_regions_facilities_endpoints(client):
+    cid = client.post("/api/calls", json={"scenario": "ar_alain_traffic", "speed": 200}).json()["call_id"]
+    for _ in range(100):
+        case = client.get(f"/api/calls/{cid}/case").json()
+        if case.get("location") and len(case["timeline"]) > 6:
+            break
+        time.sleep(0.05)
+    assert case["location"]["region"] == "Al Ain Region" and case["facilities"]
+    assert client.get(f"/api/calls/{cid}").json()["case"]["case_number"] == case["case_number"]
+    assert {r["name"] for r in client.get("/api/regions").json()} == {"Abu Dhabi Region", "Al Ain Region", "Al Dhafra Region"}
+    assert {f["kind"] for f in client.get("/api/facilities").json()} == {"hospital", "police", "civil_defence"}
+    assert client.get("/api/calls").json()[0]["region"] == "Al Ain Region"

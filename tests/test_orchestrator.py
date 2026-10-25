@@ -110,3 +110,50 @@ def test_eval_harness_meets_mvp_targets():
     from copilot.eval import run
     r = run()
     assert r["pass"], r
+
+
+def test_case_record_region_facilities_timeline(orch):
+    from copilot.eval import replay
+    sc = load_scenarios()
+    st = replay(orch, sc["en_dhafra_gas"], "D1")
+    case = orch.case(st)
+    assert case["case_number"].startswith("AD-") and case["case_number"].endswith("00001")
+    assert case["location"]["region"] == "Al Dhafra Region" and case["location"]["region_ar"] == "منطقة الظفرة"
+    assert case["facilities"][0]["kind"] == "civil_defence" and case["facilities"][0]["distance_km"] < 5
+    assert orch.calls["D1"].fields["region"].value == "Al Dhafra Region"
+    st2 = replay(orch, sc["ar_alain_traffic"], "D2")
+    c2 = orch.case(st2)
+    assert c2["case_number"].endswith("00002") and c2["location"]["region"] == "Al Ain Region"
+    assert {f["kind"] for f in c2["facilities"]} == {"police", "hospital"}  # traffic police + ambulance
+    assert "unacknowledged critical cues" in c2["flags"]
+    orch.field_action("D2", "location", "accept")
+    events = [e["event"] for e in orch.case(orch.calls["D2"])["timeline"]]
+    assert events[0] == "Call received" and any("accepted Location" in e for e in events)
+
+
+def test_region_for_handset_only_and_outside_coverage(orch):
+    st = orch.start_call("H1", aml={"lat": 23.66, "lon": 53.71, "accuracy_m": 50})
+    orch.ingest(Segment(call_id="H1", speaker="caller", text="help there is a fire", final=True))
+    loc = orch.case(st)["location"]
+    assert loc["source"] == "aml" and loc["region"] == "Al Dhafra Region"
+    assert any("handset only" in f for f in orch.case(st)["flags"])
+    far = orch.ref.locate(26.5, 50.0)
+    assert far.get("outside_coverage") is True
+
+
+def test_case_number_survives_restart(tmp_path):
+    from copilot.audit import AuditLog
+    from copilot.cad import MockCAD
+    from copilot.orchestrator import Orchestrator
+    a = Orchestrator(AuditLog(tmp_path / "a.jsonl"), MockCAD(tmp_path / "c"))
+    a.start_call("X1"); a.start_call("X2")
+    b = Orchestrator(AuditLog(tmp_path / "a.jsonl"), MockCAD(tmp_path / "c"))
+    assert b.start_call("X3").case_number.endswith("00003")
+
+
+def test_shadow_mode_case_hides_ai_content(orch):
+    orch.set_mode("shadow")
+    st = play(orch)
+    case = orch.public_state(st)["case"]
+    assert "incident" not in case and "location" not in case
+    assert all(not e["ai"] for e in case["timeline"]) and case["case_number"]

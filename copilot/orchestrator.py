@@ -17,6 +17,7 @@ from pathlib import Path
 
 from .audit import AuditLog
 from .bus import EventBus
+from .casefile import Reference, build_case
 from .cad import CADAdapter
 from .extractor import Extraction, extract
 from .lang import detect_lang
@@ -32,7 +33,7 @@ _LABELS = {
     "incident_type": "Incident type", "location": "Location", "address_detail": "Building / floor", "priority": "Priority",
     "persons": "People involved", "ages": "Age(s)", "injuries": "Injuries", "weapons": "Weapons", "vehicles": "Vehicles",
     "plates": "Plate numbers", "hazards": "Hazards", "narrative": "Narrative", "caller_number": "Caller number",
-    "language": "Caller language",
+    "language": "Caller language", "region": "Region",
 }
 
 
@@ -52,6 +53,8 @@ class Orchestrator:
         self.truth: dict[str, dict] = {}
         self.latencies: deque[float] = deque(maxlen=5000)
         self.ex_cache: dict[str, Extraction] = {}
+        self.ref = Reference(self.location.gaz.entries)
+        self._case_seq = sum(1 for r in self.audit.read(limit=10**9) if r["action"] == "call_start")
 
     # ------------------------------------------------------------------ lifecycle
     def start_call(self, call_id: str | None = None, caller_number: str | None = None, aml: dict | None = None,
@@ -59,9 +62,12 @@ class Orchestrator:
         call_id = call_id or "C-" + uuid.uuid4().hex[:8]
         if call_id in self.calls:
             raise ValueError(f"call {call_id} already exists")
-        st = CallState(call_id=call_id, caller_number=caller_number, aml=aml, scenario=scenario)
+        self._case_seq += 1
+        st = CallState(call_id=call_id, caller_number=caller_number, aml=aml, scenario=scenario,
+                       case_number=f"AD-{time.strftime('%Y')}-{self._case_seq:05d}")
         self.calls[call_id] = st
-        self.audit.write(call_id, "system", "call_start", {"caller_number": caller_number, "aml": aml, "scenario": scenario, "mode": self.mode})
+        self._event(st, "Call received", ai=False)
+        self.audit.write(call_id, "system", "call_start", {"case_number": st.case_number, "caller_number": caller_number, "aml": aml, "scenario": scenario, "mode": self.mode})
         if caller_number:
             self._upsert(st, FieldSuggestion(key="caller_number", label=_LABELS["caller_number"], value=caller_number, confidence=1.0,
                                              explanation="From telephony CTI metadata"))
@@ -75,6 +81,7 @@ class Orchestrator:
         if st.status == "ended":
             return st
         st.status, st.ended_at = "ended", time.time()
+        self._event(st, "Call ended", ai=False)
         st.partials = {}
         if self.features["cad_write"] and self.mode == "assist":
             self.cad.close_incident(call_id)
@@ -134,6 +141,7 @@ class Orchestrator:
                 if c.id not in st.cues:
                     st.cues[c.id] = Cue(id=c.id, label=c.label, level=c.level, evidence=c.evidence)
                     self.audit.write(st.call_id, "ai", "cue_raised", {"cue": c.id, "evidence": c.evidence})
+                    self._event(st, f"Critical cue: {c.label}", ai=True)
                     new_cue = True
 
         t = time.perf_counter()
@@ -203,6 +211,11 @@ class Orchestrator:
             conf = b.confidence * (f if b.source == "speech" else 1.0)
             P("location", b.name, conf, [b.evidence], b.note or ("Matched against local gazetteer" if b.source == "speech" else "Handset position only"),
               {"lat": b.lat, "lon": b.lon, "candidates": [c.model_dump() for c in st.candidates]})
+            where = self.ref.locate(b.lat, b.lon)
+            reg = b.region or where["region"]
+            r = self.ref.region(reg)
+            P("region", reg, conf * 0.95, [b.evidence], "Derived from the matched place" if b.region else "Nearest known place to the handset position",
+              {"name_ar": r["name_ar"] if r else None, "area": b.area or where["area"]})
         if ex.address_detail:
             P("address_detail", ", ".join(ex.address_detail), 0.8 * f, [], "Spoken building / floor details")
         if ex.persons:
@@ -237,6 +250,8 @@ class Orchestrator:
                 return False
         value_changed = cur is None or cur.value != p.value
         st.fields[p.key] = p
+        if cur is None and p.key in ("incident_type", "location", "region"):
+            self._event(st, f"{p.label} suggested: {p.value}", ai=True)
         if value_changed:
             self.audit.write(st.call_id, "ai", "suggestion", {"key": p.key, "value": p.value, "confidence": p.confidence, "evidence": p.evidence})
         return True
@@ -261,6 +276,7 @@ class Orchestrator:
         else:
             raise ValueError(f"unknown action {action}")
         f.updated_at = time.time()
+        self._event(st, f"{actor} {dict(accept='accepted', reject='rejected', edit='edited')[action]} {f.label}: {f.value}", ai=False)
         self.audit.write(call_id, actor, f"field_{action}", {"key": key, "value": f.value, "previous": old, "confidence": f.confidence})
         if f.status in ("accepted", "edited") and self.features["cad_write"]:
             self.cad.update_field(call_id, key, f.value, f.meta)
@@ -299,8 +315,17 @@ class Orchestrator:
             raise KeyError(call_id)
         return self.calls[call_id]
 
+    def _event(self, st: CallState, text: str, ai: bool) -> None:
+        now = time.time()
+        st.timeline.append({"ts": round(now, 2), "t_s": round(now - st.started_at, 1), "event": text, "ai": ai})
+
+    def case(self, st: CallState) -> dict:
+        return build_case(st, self.ref, include_ai=self.mode != "shadow")
+
     def public_state(self, st: CallState) -> dict:
         d = st.model_dump()
+        d["case"] = self.case(st)
+        d.pop("timeline", None)
         d["mode"] = self.mode
         d["features"] = self.features
         if self.mode == "shadow":
@@ -319,7 +344,8 @@ class Orchestrator:
                 "call_id": st.call_id, "status": st.status, "age_s": int((st.ended_at or now) - st.started_at),
                 "silent_s": int(now - st.last_activity) if st.status == "active" else 0,
                 "stuck": st.status == "active" and now - st.last_activity > 30,
-                "lang": st.lang, "dialect": st.dialect,
+                "lang": st.lang, "dialect": st.dialect, "case_number": st.case_number,
+                "region": None if hidden or not st.fields.get("region") else st.fields["region"].value,
                 "severity": None if hidden else {"level": st.severity.level, "score": st.severity.score},
                 "incident": None if hidden or not inc else inc.value, "location": None if hidden or not loc else loc.value,
                 "cues": [] if hidden else [{"id": c.id, "label": c.label, "acked": c.acked} for c in st.cues.values()],

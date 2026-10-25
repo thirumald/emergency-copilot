@@ -50,6 +50,8 @@ class LocCandidate(BaseModel):
     lat: float
     lon: float
     confidence: float
+    region: str | None = None
+    area: str | None = None
     source: Literal["speech", "aml"]
     evidence: str = ""
     note: str = ""
@@ -77,6 +79,8 @@ class ChecklistItem(BaseModel):
 
 class CallState(BaseModel):
     call_id: str
+    case_number: str = ""
+    timeline: list[dict[str, Any]] = []
     status: Literal["active", "ended"] = "active"
     started_at: float = Field(default_factory=time.time)
     last_activity: float = Field(default_factory=time.time)

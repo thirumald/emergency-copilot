@@ -120,8 +120,9 @@ class LocationEngine:
             ent = by_id[eid]
             conf = 0.5 + (min(score, 1.0) - MIN_SCORE) / (1 - MIN_SCORE) * 0.45
             out.append(LocCandidate(name=ent["name"], name_ar=ent.get("name_ar"), kind=ent["type"], lat=ent["lat"], lon=ent["lon"],
+                                    region=ent.get("region"), area=ent.get("area"),
                                     confidence=round(conf, 2), source="speech", evidence=original_span(text, idx, s, e)))
-        return sorted(out, key=lambda c: c.confidence, reverse=True)
+        return sorted(out, key=lambda c: (c.confidence, len(c.evidence)), reverse=True)
 
     def resolve(self, text: str, aml: dict | None = None) -> list[LocCandidate]:
         cands = self.match_text(text)
@@ -139,4 +140,4 @@ class LocationEngine:
                 c.note = f"conflicts with handset location ({d / 1000:.1f} km away), verify"
         cands.append(LocCandidate(name="Handset location (AML)", kind="aml", lat=aml["lat"], lon=aml["lon"],
                                   confidence=aml_conf, source="aml", note=f"accuracy ±{int(acc)} m"))
-        return sorted(cands, key=lambda c: c.confidence, reverse=True)[:4]
+        return sorted(cands, key=lambda c: (c.confidence, len(c.evidence)), reverse=True)[:4]

@@ -36,6 +36,8 @@
     <section class="card col">
       <h2>Live transcript <span id="langInfo" class="muted"></span></h2>
       <div id="transcript" class="transcript"></div>
+      <h2>Case details</h2>
+      <div id="caseCard" class="casecard muted">No case yet.</div>
     </section>
 
     <section class="card col">
@@ -50,6 +52,7 @@
       <h2>Location</h2>
       <div id="leaflet" aria-label="Abu Dhabi map"></div>
       <svg id="map" class="hidden" viewBox="0 0 300 220" role="img" aria-label="Schematic fallback map"></svg>
+      <div class="legend"><i style="background:#22c55e"></i>hospital<i style="background:#3b82f6"></i>police<i style="background:#f97316"></i>civil defence<i style="background:#64748b"></i>places</div>
       <div id="cands" class="muted"></div>
       <h2>Next question</h2>
       <div id="nextQ" class="nextq">–</div>
@@ -63,7 +66,7 @@
 
 <main id="wall" class="view hidden">
   <section class="card"><h2>Active calls</h2>
-    <table id="wallTable"><thead><tr><th>Call</th><th>Priority</th><th>Incident</th><th>Location</th><th>Language</th><th>Alerts</th><th>Age</th><th>Status</th></tr></thead><tbody></tbody></table>
+    <table id="wallTable"><thead><tr><th>Case</th><th>Region</th><th>Priority</th><th>Incident</th><th>Location</th><th>Language</th><th>Alerts</th><th>Age</th><th>Status</th></tr></thead><tbody></tbody></table>
   </section>
 </main>
 

@@ -10,7 +10,7 @@ Runs on a laptop with no GPU. The speech and language models are pluggable; this
 ```bash
 pip install -r requirements.txt
 python -m copilot            # http://127.0.0.1:8080  (HOST / PORT env vars)
-python -m pytest             # 38 tests
+python -m pytest             # 43 tests
 python -m copilot.eval       # replay scenarios, score against MVP KPI targets
 ```
 
@@ -46,6 +46,22 @@ endpoint `GET /api/shadow/report` against the call-taker's own entries (`POST /a
 switches (`/api/admin/features/{name}`); every transcript line, suggestion, cue, accept/reject/edit and CAD write in the audit
 chain (`GET /api/audit/verify` detects any edit, deletion or reorder); call archive with call-taker corrections in
 `var/calls/*.json` as the "collect" step of the learning loop.
+
+## Abu Dhabi regions and case record
+
+The gazetteer (`data/gazetteer.json`) covers the three regions of the Emirate: **Abu Dhabi Region** (island, Reem / Maryah,
+Saadiyat / Yas, Mussafah, mainland), **Al Ain Region** (city, Jebel Hafeet) and **Al Dhafra Region** (Madinat Zayed, Ruwais,
+Liwa, Ghayathi, Al Mirfa). Every place carries `region` and `area`; a handset-only position is mapped to the nearest known place.
+Each call gets a **case record** (`casefile.py`, `GET /api/calls/{id}/case`, shown in the call-taker panel):
+
+* case number `AD-<year>-<seq>` (sequence survives restarts), status, caller and language
+* region (English / Arabic), area, location with confidence and acceptance status, coordinates, building / floor
+* incident type and code, priority, people / injuries / hazards, critical cues
+* responding agencies with hotlines and the **nearest hospital / police / civil defence facility** (straight-line km, not ETA)
+* data-quality flags (low-confidence location, handset-only position, unacknowledged cues) and a timeline of AI and human events
+
+Reference data (`regions.json`, `facilities.json`, `agencies.json`) is demo data with approximate coordinates. In shadow mode the
+case record exposes only the non-AI parts. Unit recommendation and ETA remain Phase 2.
 
 ## Configuration
 
