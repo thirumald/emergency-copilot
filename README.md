@@ -10,7 +10,7 @@ Runs on a laptop with no GPU. The speech and language models are pluggable; this
 ```bash
 pip install -r requirements.txt
 python -m copilot            # http://127.0.0.1:8080  (HOST / PORT env vars)
-python -m pytest             # 66 tests
+python -m pytest             # 69 tests
 python -m copilot.eval       # replay scenarios, score against MVP KPI targets
 ```
 
@@ -105,6 +105,20 @@ The AI integrations are covered by tests that use fake providers; they have **no
 model in this repository's CI (no key or model available there). The static pages (`usecases.html`, `ccc.html`) carry an **AI agent** button (robot icon). By default it is keyword search that sends
 nothing anywhere; if Ollama is running on the visitor's own computer (started with `OLLAMA_ORIGINS` allowing the page), the page detects it
 and answers with that local model, sending the question only to `localhost`.
+
+## Video samples (`web/video/`)
+
+Six MP4 files, about 4 MB in total, no audio, referenced by `usecases.html` and `ccc.html`:
+
+| File | What it is |
+|---|---|
+| `demo_ccc_simulation.mp4` | Screen recording (52 s, real time) of the CCC simulation: calls, alerts, SOP, manual and autopilot dispatch, a surge, units moving |
+| `demo_usecases_tour.mp4` | Screen recording (43 s) of the use-case page: cards, languages, dialog, call replay, regions, AI agent |
+| `cctv_collision / fire / crime / medical.mp4` | Four 12 s **simulated** CCTV clips, drawn as canvas animations (`scripts/video/cctv.html`). They are **not real footage** and say so in the frame. The CCC plays the matching clip in the incident panel; real camera fusion (ONVIF, ANPR) is a Phase 2 feature and is not built |
+
+I did not find or use any real incident footage: none could be downloaded from the build environment, and real footage would raise rights and privacy questions.
+Regenerate with `node scripts/video/make_cctv.cjs` and `node scripts/video/record_demo.cjs [--leaflet <dir>]` (needs Node, Playwright and ffmpeg with libx264;
+CI does not run them). The recordings were made offline, so their live map shows markers on a grid without map tiles.
 
 ## Configuration
 

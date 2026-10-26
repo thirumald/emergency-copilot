@@ -5,7 +5,7 @@ name: Deploy use-case page to GitHub Pages
 on:
   push:
     branches: ["main"]
-    paths: ["web/usecases.html", "web/ccc.html", ".github/workflows/pages.yml"]
+    paths: ["web/usecases.html", "web/ccc.html", "web/video/**", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:
@@ -30,6 +30,7 @@ jobs:
           mkdir _site
           cp web/usecases.html _site/index.html
           cp web/usecases.html web/ccc.html _site/
+          cp -r web/video _site/video
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

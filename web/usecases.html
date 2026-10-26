@@ -145,6 +145,8 @@ th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}th{b
 .ig .ic{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:color-mix(in srgb,var(--brand) 14%,transparent);color:var(--brand)}.ig h3{margin:4px 0 0;font-size:16px}.ig p{margin:0;color:var(--muted);font-size:14px}.ig small{color:var(--muted);font-size:12.5px}
 .pill{align-self:flex-start;font-size:11px;font-weight:800;letter-spacing:.05em;padding:2px 9px;border-radius:99px}.pill.ok{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}.pill.plan{background:var(--surface2);color:var(--muted)}
 .faq details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:8px}.faq summary{cursor:pointer;font-weight:700}.faq p{margin:8px 0 0;color:var(--muted)}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}.vgrid.big{grid-template-columns:repeat(auto-fit,minmax(380px,1fr))}
+.vc{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin:0}.alt .vc{background:var(--bg)}.vc video{width:100%;aspect-ratio:16/9;display:block;background:#000}.vc .vb{padding:12px 16px 14px}.vc h3{margin:0 0 4px;font-size:16px}.vc p{margin:0;color:var(--muted);font-size:13.5px}
 .audgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
 .aud{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px}
 .aud header{display:flex;align-items:center;gap:10px}.aud header .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:#fff;background:var(--language)}
@@ -219,7 +221,7 @@ footer .by .av{width:34px;height:34px;border-radius:50%;background:linear-gradie
 <header class="nav"><div class="wrap">
   <a class="logo" href="#top"><span class="mark"><svg class="i"><use href="#i-siren"/></svg></span> CCC Co-Pilot</a>
   <ul>
-    <li><a href="#how">How it works</a></li><li><a href="#usecases">Use cases</a></li><li><a href="#demo">Live demo</a></li><li><a href="#audio">Audio</a></li>
+    <li><a href="#how">How it works</a></li><li><a href="#usecases">Use cases</a></li><li><a href="#demo">Live demo</a></li><li><a href="#audio">Audio</a></li><li><a href="#videos">Videos</a></li>
     <li><a href="#coverage">Abu Dhabi</a></li><li><a href="#roles">Roles</a></li><li><a href="#trust">Safety</a></li><li><a href="#integrations">Integrations</a></li><li><a href="#deploy">Deploy</a></li><li><a href="#roadmap">Roadmap</a></li><li><a href="ccc.html"><b>Full CCC simulation</b></a></li>
   </ul>
   <button class="iconbtn" id="theme" aria-label="Toggle dark mode"><svg class="i"><use href="#i-moon"/></svg></button>
@@ -318,7 +320,26 @@ footer .by .av{width:34px;height:34px;border-radius:50%;background:linear-gradie
   <div class="callout warn" style="margin-top:18px"><b>Language support today.</b> Arabic and English are built and tested. Hindi, Tamil and Malayalam are shown as audio and text only: speech recognition and extraction for them are planned (Phase 2 multilingual work), so the Co-Pilot does not yet understand them and says so.</div>
 </div></section>
 
-<section class="block alt" id="coverage"><div class="wrap">
+<section class="block alt" id="videos"><div class="wrap">
+  <span class="kicker">Video samples</span><h2>See it running</h2>
+  <p class="sub">Two screen recordings of the pages in this project, and four simulated camera clips. The camera clips are animations drawn for this demo, not real footage. The recordings were made offline, so the live map in them shows markers on a grid without map tiles. No video has sound.</p>
+  <div class="vgrid big">
+    <article class="vc"><video controls preload="metadata" poster="video/demo_ccc_simulation.jpg" playsinline><source src="video/demo_ccc_simulation.mp4" type="video/mp4"></video>
+      <div class="vb"><h3>CCC simulation, in real time</h3><p>Incoming calls, AI alerts, real-time SOP, manual and autopilot dispatch, a surge of six calls, and units moving on the map. 0:52 · 1.2 MB</p></div></article>
+    <article class="vc"><video controls preload="metadata" poster="video/demo_usecases_tour.jpg" playsinline><source src="video/demo_usecases_tour.mp4" type="video/mp4"></video>
+      <div class="vb"><h3>Use-case page tour</h3><p>Illustrated cards, switching between Arabic, Tamil and English, the detail dialog, replaying a call, the audio samples, the region map and the AI agent. 0:43 · 2.2 MB</p></div></article>
+  </div>
+  <h3 style="margin:28px 0 12px">Simulated camera feeds <span class="pill plan">Phase 2 concept</span></h3>
+  <p class="sub" style="margin-bottom:14px">When an incident is selected in the CCC simulation, the matching clip plays in the incident panel. Real camera fusion (ONVIF, ANPR) is planned and not built.</p>
+  <div class="vgrid">
+    <article class="vc"><video controls loop muted preload="metadata" poster="video/cctv_collision.jpg" playsinline><source src="video/cctv_collision.mp4" type="video/mp4"></video><div class="vb"><h3>Road collision</h3><p>Two cars collide, bystanders run in, an ambulance arrives. 0:12</p></div></article>
+    <article class="vc"><video controls loop muted preload="metadata" poster="video/cctv_fire.jpg" playsinline><source src="video/cctv_fire.mp4" type="video/mp4"></video><div class="vb"><h3>Building fire</h3><p>Fire and smoke, people evacuate, a fire engine arrives and sprays. 0:12</p></div></article>
+    <article class="vc"><video controls loop muted preload="metadata" poster="video/cctv_crime.jpg" playsinline><source src="video/cctv_crime.mp4" type="video/mp4"></video><div class="vb"><h3>Crime in progress</h3><p>A person flees a shop, police arrive and give chase. 0:12</p></div></article>
+    <article class="vc"><video controls loop muted preload="metadata" poster="video/cctv_medical.jpg" playsinline><source src="video/cctv_medical.mp4" type="video/mp4"></video><div class="vb"><h3>Medical emergency</h3><p>A bystander helps a collapsed person, paramedics arrive with a stretcher. 0:12</p></div></article>
+  </div>
+</div></section>
+
+<section class="block" id="coverage"><div class="wrap">
   <span class="kicker">Abu Dhabi coverage</span><h2>Three regions, one gazetteer, nearest facilities per case</h2>
   <p class="sub">Spoken places resolve to a region and area. Each case lists the nearest hospital, police and civil defence facility for the responding agencies. The Google map shows the real geography; the region overview below is a schematic. Coordinates are approximate demo data.</p>
   <div class="gmap">

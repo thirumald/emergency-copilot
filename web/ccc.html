@@ -35,7 +35,7 @@ button:hover{border-color:var(--brand)}button.on{background:var(--brand);border-
 @keyframes bl{50%{opacity:.5}}
 .u{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:center;padding:4px 10px;border-bottom:1px solid var(--line);font-size:13px}
 .dot{width:10px;height:10px;border-radius:50%;background:var(--ok)}.dot.enroute,.dot.dispatched{background:var(--warn)}.dot.onscene{background:var(--P1)}.dot.returning{background:#64748b}
-#map{flex:1;min-height:0;background:#0a1420;border-radius:0 0 12px 12px}
+#map{flex:1;min-height:0;background:#0a1420 linear-gradient(rgba(120,160,210,.06) 1px,transparent 1px) 0 0/56px 56px,linear-gradient(90deg,rgba(120,160,210,.06) 1px,transparent 1px) 0 0/56px 56px;border-radius:0 0 12px 12px}
 .mapbar{display:flex;gap:6px;flex-wrap:wrap;padding:6px 10px;border-bottom:1px solid var(--line)}
 .imk{position:relative;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#fff;border:2px solid #fff;box-shadow:0 0 0 0 currentColor}
 .imk.P1{background:var(--P1);animation:ring 1.4s infinite}.imk.P2{background:var(--P2)}.imk.P3{background:var(--P3);color:#201700}.imk.P4{background:var(--P4);color:#04180a}.imk.sel{outline:3px solid var(--brand);outline-offset:2px}.imk.res{opacity:.4}
@@ -55,6 +55,7 @@ mark{background:#f59e0b55;color:inherit;border-radius:3px;padding:0 2px}
 .dsp .ag{font-weight:800;margin:6px 0 2px;display:flex;gap:8px;align-items:center}.warnbox{color:var(--warn);font-size:12px}
 .log{font:12.5px ui-monospace,Menlo,Consolas,monospace}.le{display:grid;grid-template-columns:70px 78px 100px 1fr;gap:8px;padding:2px 10px;border-bottom:1px solid #16273a}
 .le .k{font-weight:800}.k.call{color:#60a5fa}.k.sop{color:#a78bfa}.k.dispatch{color:#fbbf24}.k.unit{color:#34d399}.k.sys{color:#94a3b8}.k.cue{color:#f87171}
+.cam video{width:100%;aspect-ratio:16/9;display:block;border-radius:10px;border:1px solid var(--line);background:#000}.cam small{display:block;color:var(--muted);margin-top:4px;font-size:12px}
 .hint{color:var(--muted);font-size:12px;padding:6px 12px}
 .empty{color:var(--muted);padding:30px;text-align:center}
 @media(max-width:1180px){body{overflow:auto}.app{height:auto;grid-template-rows:none}.main{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(3,1fr)}#mapcard{height:420px}.card{max-height:520px}#logcard{height:240px}}
@@ -349,12 +350,22 @@ function renderKpi() {
   $("#kDsp").textContent = S.dsp.length ? Math.round(S.dsp.reduce((a, b) => a + b, 0) / S.dsp.length / 60 * 10) / 10 + " min" : "–";
 }
 function hl(text, ev) { const r = []; ev.filter(Boolean).forEach((e) => { const i = text.indexOf(e); if (i >= 0) r.push([i, i + e.length]); }); r.sort((a, b) => a[0] - b[0]); let o = "", p = 0; r.forEach(([s, e]) => { if (s >= p) { o += esc(text.slice(p, s)) + "<mark>" + esc(text.slice(s, e)) + "</mark>"; p = e; } }); return o + esc(text.slice(p)); }
+const CAMCLIP = { TRAFFIC: "collision", FIRE: "fire", CRIME: "crime", MEDICAL: "medical" };
+const CAMINFO = { collision: "CAM-014 · Sheikh Zayed bin Sultan St", fire: "CAM-027 · Mussafah Industrial", crime: "CAM-008 · Al Khalidiyah", medical: "CAM-003 · Hamdan St" };
+const camBox = document.createElement("div"); camBox.className = "cam"; camBox.innerHTML = '<h3>Nearest camera <span style="text-transform:none;letter-spacing:0">(simulated clip)</span></h3><video muted loop playsinline autoplay preload="metadata"></video><small></small>';
+function placeCam(f) {   // one persistent <video> so the clip keeps playing while the panel re-renders
+  const slot = $("#camSlot"); if (!slot) return; const clip = f && f.type && CAMCLIP[f.type];
+  if (!clip) { slot.innerHTML = '<div class="hint">Camera view appears once the incident type is known.</div>'; return; }
+  const v = camBox.querySelector("video"), src = `video/cctv_${clip}.mp4`; if (v.getAttribute("src") !== src) { v.setAttribute("src", src); v.poster = `video/cctv_${clip}.jpg`; }
+  camBox.querySelector("small").textContent = `${CAMINFO[clip]} · simulated; camera fusion is a Phase 2 feature`; slot.textContent = ""; slot.appendChild(camBox); v.play().catch(() => {});
+}
 function renderDetail() {
   const inc = S.incs.find((i) => i.id === S.sel); if (!inc) { $("#detail").innerHTML = '<div class="empty">Select an incident in the queue or on the map.</div>'; $("#detTitle").textContent = "Selected incident"; return; }
   const f = cur(inc), p = prio(inc), shown = inc.frames.slice(0, inc.idx), ev = f ? f.cues.map((c) => c.evidence) : [];
   $("#detTitle").textContent = `Incident ${inc.num}`;
   let h = `<div class="det"><div class="hd"><div class="pb ${p || ""}">${p || "…"}</div><div><b>${esc(f && f.fields.incident_type ? f.fields.incident_type.value : "Incoming call")}</b><small>${esc(inc.title)} · ${esc(f ? f.lang : "")}</small></div><span class="st ${stClass(inc)}" style="margin-left:auto">${stLabel[inc.state]}</span><button id="expBtn" title="Download this incident as JSON" aria-label="Export incident as JSON">Export</button></div>`;
   h += `<div><h3>Live call (simulated replay)</h3><div class="tr" id="trbox">${shown.map((m) => `<div class="m ${m.speaker} ${m.lowq ? "lowq" : ""}" dir="auto"><small>${m.speaker}${m.lowq ? " · low audio quality" : ""}</small>${hl(m.text, m.speaker === "calltaker" ? [] : ev)}</div>`).join("") || '<div class="hint">Ringing…</div>'}</div></div>`;
+  h += '<div id="camSlot"></div>';
   if (f) { h += `<div><h3>AI alerts</h3>${f.cues.map((c) => `<span class="cue ${c.level}">${ico("alert")} ${esc(c.label)}</span>`).join("") || '<span class="hint">None yet</span>'}</div>`;
     h += `<div class="fl">${["incident_type", "priority", "location", "region", "persons", "ages", "injuries", "hazards"].filter((k) => f.fields[k]).map((k) => `<div class="f"><span>${esc(f.fields[k].label)} · ${Math.round(f.fields[k].conf * 100)}%</span><b dir="auto">${esc(f.fields[k].value)}</b></div>`).join("")}</div>`;
     h += `<div class="sop"><h3 style="color:var(--brand)">Real-time SOP</h3>${f.next ? `<div class="nq"><b dir="auto">${esc(f.next.en)}</b><div dir="rtl" style="color:var(--muted)">${esc(f.next.ar)}</div></div>` : '<div class="nq"><b>All protocol questions answered.</b></div>'}
@@ -370,7 +381,7 @@ function renderDetail() {
       : '<div class="warnbox">No unit of this type is available. The request stays queued until one is released.</div>'; } });
   h += `<div class="hint">★ recommended = nearest available (straight-line ×1.3 at ${SPEED_KMH} km/h). Autopilot approves recommendations; with autopilot off a dispatcher must click Dispatch.</div></div>`;
   h += `<div><h3>Incident timeline</h3><div class="log" style="max-height:130px;overflow:auto">${S.log.filter((l) => l.inc === inc.id).map((l) => `<div class="le" style="grid-template-columns:62px 1fr"><span>${clockStr(l.t)}</span><span class="k ${l.kind}" style="font-weight:400;color:var(--text)">${esc(l.text)}</span></div>`).join("")}</div></div></div>`;
-  const keep = $("#detail").scrollTop; $("#detail").innerHTML = h; $("#detail").scrollTop = keep; const tb = $("#trbox"); if (tb) tb.scrollTop = 1e6;
+  const keep = $("#detail").scrollTop; $("#detail").innerHTML = h; placeCam(f); $("#detail").scrollTop = keep; const tb = $("#trbox"); if (tb) tb.scrollTop = 1e6;
   $("#expBtn").onclick = () => { const f = cur(inc), rec = { case_number: inc.num, scenario: inc.sc, simulated: true, priority: prio(inc), state: inc.state, location: { lat: inc.lat, lon: inc.lon },
       fields: f ? Object.fromEntries(Object.entries(f.fields).map(([k, v]) => [k, v.value])) : {}, alerts: f ? f.cues.map((c) => c.label) : [], assigned_units: inc.assigned, transcript: inc.frames.slice(0, inc.idx).map((m) => ({ speaker: m.speaker, text: m.text })),
       timeline: S.log.filter((l) => l.inc === inc.id).reverse().map((l) => ({ clock: clockStr(l.t), kind: l.kind, text: l.text })) };
